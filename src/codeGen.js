@@ -348,19 +348,101 @@ function generateArduinoAdafruit(cfg, bytes, elemInfo, template, includeInit, in
     lines.push(``);
 
     if (cfg.frames && cfg.frames.length > 1) {
-      lines.push(`  Serial.println(F("[OK] Animación lista para reproducir."));`);
-      lines.push(`}`);
-      lines.push(``);
-      lines.push(`void loop() {`);
-      lines.push(`  // Reproducir ciclo continuo de animación`);
-      lines.push(`  for (int f = 0; f < TOTAL_FRAMES; f++) {`);
-      lines.push(`    display.clearDisplay();`);
-      lines.push(`    const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[f]));`);
-      lines.push(`    display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`);
-      lines.push(`    display.display();`);
-      lines.push(`    delay(FRAME_DELAY_MS);`);
-      lines.push(`  }`);
-      lines.push(`}`);
+      if (isDynamicAnalog) {
+        const tplId = cfg.templateId || '';
+        const isECG = tplId === 'ecg_pulse' || /ecg|card|pulso/i.test(cfg.templateName || '');
+
+        lines.push(`  Serial.println(F("[OK] Animación lista con control por Pin Analógico."));`);
+        lines.push(`}`);
+        lines.push(``);
+
+        if (isECG) {
+          lines.push(`void loop() {`);
+          lines.push(`  // 1. Leer el sensor analógico en pin (${analogPin})`);
+          lines.push(`  int rawValue = analogRead(SENSOR_ANALOG_PIN);`);
+          lines.push(``);
+          lines.push(`  // 2. Mapear lectura analógica a velocidad de pulso cardíaco`);
+          lines.push(`  // Mayor valor analógico = pulso más rápido (menor retardo por cuadro)`);
+          lines.push(`  int frameDelay = map(rawValue, 0, 1023, 140, 20);`);
+          lines.push(`  int bpm = map(rawValue, 0, 1023, 50, 175); // Ritmo cardíaco (BPM)`);
+          lines.push(``);
+          lines.push(`  Serial.print(F("Sensor Pulso [${analogPin}]: "));`);
+          lines.push(`  Serial.print(rawValue);`);
+          lines.push(`  Serial.print(F(" | Ritmo: "));`);
+          lines.push(`  Serial.print(bpm);`);
+          lines.push(`  Serial.println(F(" BPM"));`);
+          lines.push(``);
+          lines.push(`  // 3. Reproducir ciclo de electrocardiograma a la velocidad del sensor`);
+          lines.push(`  for (int f = 0; f < TOTAL_FRAMES; f++) {`);
+          lines.push(`    display.clearDisplay();`);
+          lines.push(`    const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[f]));`);
+          lines.push(`    display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`);
+          lines.push(``);
+          lines.push(`    // Mostrar BPM en pantalla`);
+          lines.push(`    display.setTextSize(1);`);
+          lines.push(`    display.setTextColor(SSD1306_WHITE);`);
+          lines.push(`    display.setCursor(4, 4);`);
+          lines.push(`    display.print(F("BPM: "));`);
+          lines.push(`    display.print(bpm);`);
+          lines.push(``);
+          lines.push(`    display.display();`);
+          lines.push(`    delay(frameDelay);`);
+          lines.push(`  }`);
+          lines.push(`}`);
+        } else {
+          lines.push(`void loop() {`);
+          lines.push(`  // 1. Leer el pin analógico (${analogPin}) - Rango 0 a 1023`);
+          lines.push(`  int rawValue = analogRead(SENSOR_ANALOG_PIN);`);
+          lines.push(``);
+          lines.push(`  // 2. Mapear lectura analógica directamente al fotograma correspondiente (0 a TOTAL_FRAMES - 1)`);
+          lines.push(`  // A medida que el sensor/potenciómetro varía, el indicador cambia proporcionalmente`);
+          lines.push(`  int frameIndex = map(rawValue, 0, 1023, 0, TOTAL_FRAMES - 1);`);
+          lines.push(`  frameIndex = constrain(frameIndex, 0, TOTAL_FRAMES - 1);`);
+          lines.push(``);
+          lines.push(`  // Porcentaje para depuración y display (0% - 100%)`);
+          lines.push(`  int percent = map(rawValue, 0, 1023, 0, 100);`);
+          lines.push(`  percent = constrain(percent, 0, 100);`);
+          lines.push(``);
+          lines.push(`  Serial.print(F("Sensor [${analogPin}]: "));`);
+          lines.push(`  Serial.print(rawValue);`);
+          lines.push(`  Serial.print(F(" ("));`);
+          lines.push(`  Serial.print(percent);`);
+          lines.push(`  Serial.print(F("%) -> Frame "));`);
+          lines.push(`  Serial.print(frameIndex + 1);`);
+          lines.push(`  Serial.print(F("/"));`);
+          lines.push(`  Serial.println(TOTAL_FRAMES);`);
+          lines.push(``);
+          lines.push(`  // 3. Dibujar el fotograma correspondiente según el valor del sensor`);
+          lines.push(`  display.clearDisplay();`);
+          lines.push(`  const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[frameIndex]));`);
+          lines.push(`  display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`);
+          lines.push(``);
+          lines.push(`  // 4. Mostrar porcentaje numérico en pantalla`);
+          lines.push(`  display.setTextSize(1);`);
+          lines.push(`  display.setTextColor(SSD1306_WHITE);`);
+          lines.push(`  display.setCursor(SCREEN_WIDTH - 30, SCREEN_HEIGHT - 9);`);
+          lines.push(`  display.print(percent);`);
+          lines.push(`  display.print(F("%"));`);
+          lines.push(``);
+          lines.push(`  display.display();`);
+          lines.push(`  delay(30); // Muestreo dinámico fluido (~33 FPS)`);
+          lines.push(`}`);
+        }
+      } else {
+        lines.push(`  Serial.println(F("[OK] Animación lista para reproducir."));`);
+        lines.push(`}`);
+        lines.push(``);
+        lines.push(`void loop() {`);
+        lines.push(`  // Reproducir ciclo continuo de animación`);
+        lines.push(`  for (int f = 0; f < TOTAL_FRAMES; f++) {`);
+        lines.push(`    display.clearDisplay();`);
+        lines.push(`    const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[f]));`);
+        lines.push(`    display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`);
+        lines.push(`    display.display();`);
+        lines.push(`    delay(FRAME_DELAY_MS);`);
+        lines.push(`  }`);
+        lines.push(`}`);
+      }
     } else if (isDynamicAnalog) {
       lines.push(`  Serial.println(F("[OK] Display inicializado en modo dinámico con sensor analógico."));`);
       lines.push(`}`);

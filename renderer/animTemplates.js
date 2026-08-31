@@ -790,6 +790,12 @@
     pushHistory();
     const frames = tpl.generate(State.width, State.height);
 
+    State.loadedTemplate = {
+      id: tpl.id,
+      name: tpl.name,
+      category: tpl.category
+    };
+
     State.frames = frames.map((f, idx) => ({
       id: Date.now() + idx,
       name: `Frame ${idx + 1}`,
@@ -806,7 +812,7 @@
     renderPreview();
     updateTimelineUI();
     closeModal('modal-anim-templates');
-    showToast(`Plantilla "${tpl.name}" cargada en la línea de tiempo ✓`, 'success');
+    showToast(`Plantilla "${tpl.name}" cargada en la línea de tiempo ✓ (Compatible con Pin Analógico)`, 'success');
   }
 
   window.addEventListener('appLanguageChanged', () => {

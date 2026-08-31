@@ -3031,9 +3031,10 @@ function openModal(id) {
     const hasWidget = (State.elements && State.elements.some(e => e.type === 'widget')) ||
                       (State.transformObject && State.transformObject.type === 'widget') ||
                       State.activeWidget;
+    const hasAnim = (State.frames && State.frames.length > 1) || State.loadedTemplate;
     const chk = document.getElementById('export-dynamic-analog');
     if (chk) {
-      if (hasWidget) chk.checked = true;
+      if (hasWidget || hasAnim) chk.checked = true;
       const wrap = document.getElementById('export-analog-pin-wrapper');
       if (wrap) wrap.style.display = chk.checked ? 'inline-flex' : 'none';
     }
@@ -3958,7 +3959,9 @@ async function generateAndShowCode() {
     includeComments,
     dynamicAnalog,
     analogPin,
-    widgets: placedWidgets
+    widgets: placedWidgets,
+    templateId: State.loadedTemplate?.id || null,
+    templateName: State.loadedTemplate?.name || null
   };
 
   try {
@@ -4097,13 +4100,50 @@ void drawProgressBar(int x, int y, int w, int h, int percent) {
     );
   }
 
+  const hasFrames = cfg.frames && cfg.frames.length > 1;
+
+  if (hasFrames) {
+    const totalFrames = cfg.frames.length;
+    const fps = cfg.fps || 10;
+    const delayMs = Math.max(20, Math.round(1000 / fps));
+    lines.push(
+      `#define TOTAL_FRAMES    ${totalFrames}`,
+      `#define FRAME_DELAY_MS  ${delayMs}`,
+      ``
+    );
+    cfg.frames.forEach((frameBm, fIdx) => {
+      const fBytes = [];
+      const totalBits = cfg.width * cfg.height;
+      for (let i = 0; i < totalBits; i += 8) {
+        let byte = 0;
+        for (let b = 0; b < 8 && i + b < totalBits; b++) {
+          if (frameBm[i + b]) byte |= (1 << (7 - b));
+        }
+        fBytes.push(byte);
+      }
+      const hexList = fBytes.map(b => `0x${b.toString(16).padStart(2, '0')}`);
+      lines.push(`static const uint8_t PROGMEM frame_${fIdx}[] = {`);
+      lines.push(`  ` + hexList.join(', '));
+      lines.push(`};`);
+      lines.push(``);
+    });
+
+    lines.push(`static const uint8_t* const PROGMEM oled_animation_frames[TOTAL_FRAMES] = {`);
+    for (let f = 0; f < totalFrames; f++) {
+      lines.push(`  frame_${f}${f < totalFrames - 1 ? ',' : ''}`);
+    }
+    lines.push(`};`, ``);
+  } else {
+    lines.push(
+      `// Bitmap generado — ${byteCount} bytes (${cfg.width}x${cfg.height})`,
+      `static const uint8_t PROGMEM oled_bitmap[] = {`,
+      bitmapStr,
+      `};`,
+      ``
+    );
+  }
+
   lines.push(
-    ``,
-    `// Bitmap generado — ${byteCount} bytes (${cfg.width}x${cfg.height})`,
-    `static const uint8_t PROGMEM oled_bitmap[] = {`,
-    bitmapStr,
-    `};`,
-    ``,
     `void setup() {`,
     `  Serial.begin(115200);`,
     isDynamicAnalog ? `  pinMode(SENSOR_ANALOG_PIN, INPUT);` : ``,
@@ -4111,13 +4151,97 @@ void drawProgressBar(int x, int y, int w, int h, int percent) {
     `    Serial.println(F("Error: SSD1306 no encontrado"));`,
     `    for (;;);`,
     `  }`,
-    ``,
-    `  display.clearDisplay();`,
-    `  display.drawBitmap(0, 0, oled_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`,
-    `  display.display();`,
-    `}`,
-    ``,
-    isDynamicAnalog ?
+    ``
+  );
+
+  if (!hasFrames) {
+    lines.push(
+      `  display.clearDisplay();`,
+      `  display.drawBitmap(0, 0, oled_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`,
+      `  display.display();`
+    );
+  }
+
+  lines.push(`}`, ``);
+
+  if (hasFrames) {
+    if (isDynamicAnalog) {
+      const isECG = cfg.templateId === 'ecg_pulse' || /ecg|card|pulso/i.test(cfg.templateName || '');
+      if (isECG) {
+        lines.push(
+          `void loop() {
+  int rawValue = analogRead(SENSOR_ANALOG_PIN);
+  int frameDelay = map(rawValue, 0, 1023, 140, 20);
+  int bpm = map(rawValue, 0, 1023, 50, 175);
+
+  Serial.print(F("Pulso ECG [${analogPin}]: "));
+  Serial.print(rawValue);
+  Serial.print(F(" | BPM: "));
+  Serial.println(bpm);
+
+  for (int f = 0; f < TOTAL_FRAMES; f++) {
+    display.clearDisplay();
+    const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[f]));
+    display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(4, 4);
+    display.print(F("BPM: "));
+    display.print(bpm);
+    display.display();
+    delay(frameDelay);
+  }
+}`
+        );
+      } else {
+        lines.push(
+          `void loop() {
+  // 1. Leer pin analógico (${analogPin})
+  int rawValue = analogRead(SENSOR_ANALOG_PIN);
+
+  // 2. Mapear lectura al cuadro correspondiente (0 a TOTAL_FRAMES - 1)
+  int frameIndex = map(rawValue, 0, 1023, 0, TOTAL_FRAMES - 1);
+  frameIndex = constrain(frameIndex, 0, TOTAL_FRAMES - 1);
+  int percent = map(rawValue, 0, 1023, 0, 100);
+
+  Serial.print(F("Sensor [${analogPin}]: "));
+  Serial.print(rawValue);
+  Serial.print(F(" ("));
+  Serial.print(percent);
+  Serial.print(F("%) -> Frame "));
+  Serial.println(frameIndex + 1);
+
+  // 3. Renderizar el cuadro animado según el valor analógico
+  display.clearDisplay();
+  const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[frameIndex]));
+  display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(SCREEN_WIDTH - 30, SCREEN_HEIGHT - 9);
+  display.print(percent);
+  display.print(F("%"));
+
+  display.display();
+  delay(30);
+}`
+        );
+      }
+    } else {
+      lines.push(
+        `void loop() {
+  for (int f = 0; f < TOTAL_FRAMES; f++) {
+    display.clearDisplay();
+    const uint8_t* ptr = (const uint8_t*)pgm_read_ptr(&(oled_animation_frames[f]));
+    display.drawBitmap(0, 0, ptr, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+    display.display();
+    delay(FRAME_DELAY_MS);
+  }
+}`
+      );
+    }
+  } else if (isDynamicAnalog) {
+    lines.push(
       `void loop() {
   // 1. Leer el pin analógico (${analogPin})
   int rawValue = analogRead(SENSOR_ANALOG_PIN);
@@ -4142,12 +4266,15 @@ void drawProgressBar(int x, int y, int w, int h, int percent) {
 
   delay(30); // Frecuencia de actualización (~33 FPS)
 }`
-      :
+    );
+  } else {
+    lines.push(
       `void loop() {
   // El diseño ya está activo en pantalla
   delay(1000);
 }`
-  );
+    );
+  }
 
   return lines.filter(Boolean).join('\n');
 }

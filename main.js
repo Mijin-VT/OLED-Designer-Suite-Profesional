@@ -93,8 +93,45 @@ function createMainWindow() {
 // MENÚ NATIVO
 // ============================================================
 
-function buildMenu() {
+function buildMenu(lang = 'es') {
   const isMac = process.platform === 'darwin';
+  const isEn = lang === 'en';
+
+  const t = {
+    file: isEn ? 'File' : 'Archivo',
+    newProject: isEn ? 'New Project' : 'Nuevo Proyecto',
+    openProject: isEn ? 'Open Project...' : 'Abrir Proyecto...',
+    save: isEn ? 'Save' : 'Guardar',
+    saveAs: isEn ? 'Save As...' : 'Guardar Como...',
+    exportCode: isEn ? 'Export Code...' : 'Exportar Código...',
+    exportImage: isEn ? 'Export Image...' : 'Exportar Imagen...',
+    quit: isEn ? 'Exit' : 'Salir',
+    edit: isEn ? 'Edit' : 'Editar',
+    undo: isEn ? 'Undo' : 'Deshacer',
+    redo: isEn ? 'Redo' : 'Rehacer',
+    cut: isEn ? 'Cut' : 'Cortar',
+    copy: isEn ? 'Copy' : 'Copiar',
+    paste: isEn ? 'Paste' : 'Pegar',
+    selectAll: isEn ? 'Select All' : 'Seleccionar Todo',
+    clearCanvas: isEn ? 'Clear Canvas' : 'Limpiar Canvas',
+    view: isEn ? 'View' : 'Ver',
+    zoomIn: isEn ? 'Zoom In' : 'Acercar',
+    zoomOut: isEn ? 'Zoom Out' : 'Alejar',
+    zoomReset: isEn ? 'Zoom 1:1' : 'Zoom 1:1',
+    grid: isEn ? 'Grid' : 'Cuadrícula',
+    preview: isEn ? 'Live Preview' : 'Vista Previa',
+    reload: isEn ? 'Reload' : 'Recargar',
+    devTools: isEn ? 'Developer Tools' : 'Herramientas de Desarrollador',
+    fullscreen: isEn ? 'Full Screen' : 'Pantalla Completa',
+    tools: isEn ? 'Tools' : 'Herramientas',
+    aiGen: isEn ? 'AI Code Assistant' : 'Generar Código con IA',
+    importImg: isEn ? 'Import Image...' : 'Importar Imagen...',
+    toMono: isEn ? 'Convert to Monochrome' : 'Convertir a Monocromo',
+    history: isEn ? 'Version History' : 'Historial de Versiones',
+    help: isEn ? 'Help' : 'Ayuda',
+    docs: isEn ? 'Documentation' : 'Documentación',
+    about: isEn ? 'About OLED-Designer-Suite-Professional' : 'Acerca de OLED-Designer-Suite-Professional'
+  };
 
   const template = [
     // App menu (solo macOS)
@@ -113,155 +150,157 @@ function buildMenu() {
       ]
     }] : []),
 
-    // Archivo
+    // Archivo / File
     {
-      label: 'Archivo',
+      label: t.file,
       submenu: [
         {
-          label: 'Nuevo Proyecto',
+          label: t.newProject,
           accelerator: 'CmdOrCtrl+N',
           click: () => mainWindow?.webContents.send('menu:new-project')
         },
         {
-          label: 'Abrir Proyecto...',
+          label: t.openProject,
           accelerator: 'CmdOrCtrl+O',
           click: () => mainWindow?.webContents.send('menu:open-project')
         },
         { type: 'separator' },
         {
-          label: 'Guardar',
+          label: t.save,
           accelerator: 'CmdOrCtrl+S',
           click: () => mainWindow?.webContents.send('menu:save-project')
         },
         {
-          label: 'Guardar Como...',
+          label: t.saveAs,
           accelerator: 'CmdOrCtrl+Shift+S',
           click: () => mainWindow?.webContents.send('menu:save-project-as')
         },
         { type: 'separator' },
         {
-          label: 'Exportar Código...',
+          label: t.exportCode,
           accelerator: 'CmdOrCtrl+E',
           click: () => mainWindow?.webContents.send('menu:export-code')
         },
         {
-          label: 'Exportar Imagen...',
+          label: t.exportImage,
           accelerator: 'CmdOrCtrl+Shift+E',
           click: () => mainWindow?.webContents.send('menu:export-image')
         },
         { type: 'separator' },
-        isMac ? { role: 'close' } : { role: 'quit', label: 'Salir' }
+        isMac ? { role: 'close' } : { role: 'quit', label: t.quit }
       ]
     },
 
-    // Editar
+    // Editar / Edit
     {
-      label: 'Editar',
+      label: t.edit,
       submenu: [
         {
-          label: 'Deshacer',
+          label: t.undo,
           accelerator: 'CmdOrCtrl+Z',
           click: () => mainWindow?.webContents.send('menu:undo')
         },
         {
-          label: 'Rehacer',
+          label: t.redo,
           accelerator: 'CmdOrCtrl+Y',
           click: () => mainWindow?.webContents.send('menu:redo')
         },
         { type: 'separator' },
-        { role: 'cut', label: 'Cortar' },
-        { role: 'copy', label: 'Copiar' },
-        { role: 'paste', label: 'Pegar' },
-        { role: 'selectAll', label: 'Seleccionar Todo' },
+        { role: 'cut', label: t.cut },
+        { role: 'copy', label: t.copy },
+        { role: 'paste', label: t.paste },
+        { role: 'selectAll', label: t.selectAll },
         { type: 'separator' },
         {
-          label: 'Limpiar Canvas',
+          label: t.clearCanvas,
           accelerator: 'CmdOrCtrl+Delete',
           click: () => mainWindow?.webContents.send('menu:clear-canvas')
         }
       ]
     },
 
-    // Ver
+    // Ver / View
     {
-      label: 'Ver',
+      label: t.view,
       submenu: [
         {
-          label: 'Acercar',
+          label: t.zoomIn,
           accelerator: 'CmdOrCtrl+Plus',
           click: () => mainWindow?.webContents.send('menu:zoom-in')
         },
         {
-          label: 'Alejar',
+          label: t.zoomOut,
           accelerator: 'CmdOrCtrl+-',
           click: () => mainWindow?.webContents.send('menu:zoom-out')
         },
         {
-          label: 'Zoom 1:1',
+          label: t.zoomReset,
           accelerator: 'CmdOrCtrl+0',
           click: () => mainWindow?.webContents.send('menu:zoom-reset')
         },
         { type: 'separator' },
         {
-          label: 'Cuadrícula',
+          label: t.grid,
           accelerator: 'CmdOrCtrl+G',
           click: () => mainWindow?.webContents.send('menu:toggle-grid')
         },
         {
-          label: 'Vista Previa',
+          label: t.preview,
           accelerator: 'CmdOrCtrl+P',
           click: () => mainWindow?.webContents.send('menu:toggle-preview')
         },
         { type: 'separator' },
-        { role: 'reload', label: 'Recargar' },
-        { role: 'toggleDevTools', label: 'Herramientas de Desarrollador' },
-        { role: 'togglefullscreen', label: 'Pantalla Completa' }
+        { role: 'reload', label: t.reload },
+        { role: 'toggleDevTools', label: t.devTools },
+        { role: 'togglefullscreen', label: t.fullscreen }
       ]
     },
 
-    // Herramientas
+    // Herramientas / Tools
     {
-      label: 'Herramientas',
+      label: t.tools,
       submenu: [
         {
-          label: 'Generar Código con IA',
+          label: t.aiGen,
           accelerator: 'CmdOrCtrl+I',
           click: () => mainWindow?.webContents.send('menu:ai-generate')
         },
         { type: 'separator' },
         {
-          label: 'Importar Imagen...',
+          label: t.importImg,
           click: () => mainWindow?.webContents.send('menu:import-image')
         },
         {
-          label: 'Convertir a Monocromo',
+          label: t.toMono,
           click: () => mainWindow?.webContents.send('menu:to-mono')
         },
         { type: 'separator' },
         {
-          label: 'Historial de Versiones',
+          label: t.history,
           click: () => mainWindow?.webContents.send('menu:version-history')
         }
       ]
     },
 
-    // Ayuda
+    // Ayuda / Help
     {
-      label: 'Ayuda',
+      label: t.help,
       submenu: [
         {
-          label: 'Documentación',
-          click: () => shell.openExternal('https://github.com/oled-designer/docs')
+          label: t.docs,
+          click: () => mainWindow?.webContents.send('menu:open-help')
         },
         { type: 'separator' },
         {
-          label: 'Acerca de OLED Designer',
+          label: t.about,
           click: () => {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
-              title: 'Acerca de OLED Designer',
-              message: 'OLED Designer v1.0.0',
-              detail: 'Editor visual para pantallas OLED\nConstruido con Electron + Node.js + PostgreSQL\n\n© 2024 OLED Designer Team'
+              title: t.about,
+              message: 'OLED-Designer-Suite-Professional v1.0.0',
+              detail: isEn
+                ? 'High-performance visual IDE & simulator for OLED displays.\nRuns with Electron + Node.js + Local Offline Storage.\n\n© 2026 OLED Designer Suite Team'
+                : 'Suite profesional de diseño, animación y emulación OLED.\nFunciona con Electron + Node.js + Almacenamiento Local Offline.\n\n© 2026 OLED Designer Suite Team'
             });
           }
         }
@@ -278,6 +317,16 @@ function buildMenu() {
 // ============================================================
 
 function registerIPCHandlers() {
+  // ---- IDIOMA / I18N ----
+  ipcMain.handle('app:set-language', async (event, lang) => {
+    try {
+      buildMenu(lang);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
   // ---- PROYECTOS ----
 
   ipcMain.handle('project:save', async (event, projectData) => {

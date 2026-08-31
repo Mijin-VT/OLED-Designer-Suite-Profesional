@@ -2948,6 +2948,7 @@ function bindMenuEvents() {
       case 'menu:ai-generate':     aiGenerateCode(); break;
       case 'menu:import-image':    document.getElementById('file-image-input').click(); break;
       case 'menu:version-history': openVersionHistory(); break;
+      case 'menu:open-help':       openModal('modal-help'); break;
     }
   });
 }

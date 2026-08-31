@@ -3207,3 +3207,87 @@ html, body {
   border-radius: 4px;
 }
 
+/* ============================================================
+   SELECTOR DE IDIOMA / LANGUAGE SELECTOR (ESPAÑOL / ENGLISH)
+   ============================================================ */
+.panel-section-lang {
+  background: linear-gradient(180deg, rgba(35, 38, 65, 0.45) 0%, rgba(20, 22, 42, 0.65) 100%);
+  border: 1px solid rgba(85, 214, 255, 0.2);
+  border-radius: var(--radius);
+  margin: 12px 10px 16px 10px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.panel-section-lang .panel-section-title {
+  color: #8be9fd;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-switch-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lang-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  background: rgba(18, 20, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  user-select: none;
+}
+
+.lang-btn:hover {
+  background: rgba(85, 214, 255, 0.12);
+  border-color: rgba(85, 214, 255, 0.35);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.lang-btn.active {
+  background: linear-gradient(135deg, rgba(85, 214, 255, 0.25) 0%, rgba(85, 120, 255, 0.15) 100%);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(85, 214, 255, 0.3);
+}
+
+.lang-flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.lang-name {
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+.lang-check {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 800;
+  display: none;
+}
+
+.lang-btn.active .lang-check {
+  display: inline-block;
+}
+
+

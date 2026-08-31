@@ -51,6 +51,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeFile: (filePath, content) => ipcRenderer.invoke('fs:write-file', { filePath, content }),
   writeBinary: (filePath, base64Data) => ipcRenderer.invoke('fs:write-binary', { filePath, base64Data }),
 
+  // ---- IDIOMA / I18N ----
+  setLanguage: (lang) => ipcRenderer.invoke('app:set-language', lang),
+
   // ---- EVENTOS DEL MENÚ (escuchar comandos del menú nativo) ----
   onMenuEvent: (callback) => {
     const events = [

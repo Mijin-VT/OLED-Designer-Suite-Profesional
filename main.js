@@ -696,6 +696,8 @@ function registerIPCHandlers() {
       activeSerialHandle = null;
       activeSerialPortName = null;
     }
+    // Pausa obligatoria para que el kernel de Windows libere el puerto COM completamente
+    await new Promise(r => setTimeout(r, 600));
 
     if (!fqbn) {
       fqbn = 'arduino:avr:mega';

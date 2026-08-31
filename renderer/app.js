@@ -4371,6 +4371,10 @@ async function uploadCodeToArduino() {
     btnUpload.textContent = '⏳ Subiendo...';
   }
 
+  if (typeof disconnectHardware === 'function') {
+    await disconnectHardware();
+  }
+
   try {
     const res = await window.electronAPI.uploadArduinoCode({
       code,

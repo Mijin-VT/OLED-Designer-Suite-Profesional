@@ -108,11 +108,9 @@ async function uploadReceiverSketchToHardware() {
     return;
   }
 
-  // Si el puerto está abierto por WebSerial, desconectarlo primero para liberar el puerto COM
-  const wasConnected = LiveHardwareStreamer.isConnected;
-  if (wasConnected) {
-    await disconnectHardware();
-  }
+  // Liberar SIEMPRE el puerto COM antes de compilar y subir
+  await disconnectHardware();
+  await new Promise(r => setTimeout(r, 400));
 
   if (logBox) {
     logBox.classList.remove('hidden', 'success', 'error');
@@ -236,22 +234,26 @@ async function disconnectHardware() {
     } catch (_) {}
   }
 
-  try {
-    if (LiveHardwareStreamer.writer) {
-      await LiveHardwareStreamer.writer.close();
-      LiveHardwareStreamer.writer = null;
-    }
-    if (LiveHardwareStreamer.port) {
+  if (LiveHardwareStreamer.writer) {
+    try { await LiveHardwareStreamer.writer.cancel(); } catch (_) {}
+    try { LiveHardwareStreamer.writer.releaseLock(); } catch (_) {}
+    LiveHardwareStreamer.writer = null;
+  }
+
+  if (LiveHardwareStreamer.port) {
+    try {
       await LiveHardwareStreamer.port.close();
-      LiveHardwareStreamer.port = null;
+    } catch (e) {
+      console.warn('[Port close error]:', e);
     }
-  } catch (e) {
-    console.warn(e);
+    LiveHardwareStreamer.port = null;
   }
 
   LiveHardwareStreamer.isConnected = false;
   updateHardwareStatusUI();
-  showToast('Hardware desconectado', 'info');
+
+  // Pausa obligatoria para que el kernel de Windows libere el puerto COM completamente
+  await new Promise(r => setTimeout(r, 600));
 }
 
 async function testWiFiConnection() {

@@ -1,7 +1,7 @@
 # ⚡ OLED Designer — Suite Profesional de Diseño y Emulación OLED
 
 <p align="center">
-  <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED" width="100%">
+  <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED" width="75%">
 </p>
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)

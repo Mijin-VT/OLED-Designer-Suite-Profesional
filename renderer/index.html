@@ -606,9 +606,26 @@
         <button class="platform-btn" data-platform="javascript" data-i18n="modal_export_tabs_js">JavaScript / TS</button>
         <button class="platform-btn" data-platform="rust" data-i18n="modal_export_tabs_rust">Rust</button>
       </div>
-      <div class="export-options">
+      <div class="export-options" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
         <label><input type="checkbox" id="export-include-init" checked /> <span data-i18n="export_opt_init">Incluir inicialización</span></label>
         <label><input type="checkbox" id="export-include-comments" checked /> <span data-i18n="export_opt_comments">Incluir comentarios</span></label>
+        <label><input type="checkbox" id="export-dynamic-analog" checked /> <span data-i18n="export_opt_dynamic_analog">⚡ Pin Analógico (Widget Dinámico)</span></label>
+        <div id="export-analog-pin-wrapper" style="display:inline-flex; align-items:center; gap:5px;">
+          <span style="font-size:11px; color:#38bdf8; font-weight:600;" data-i18n="export_analog_pin_label">Pin:</span>
+          <select id="export-analog-pin-select" class="form-select-sm" style="padding:2px 8px; font-size:11px; background:#12162a; color:#38bdf8; border:1.5px solid #38bdf8; border-radius:4px; font-weight:700; cursor:pointer;">
+            <option value="A0" selected>A0</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="A3">A3</option>
+            <option value="A4">A4</option>
+            <option value="A5">A5</option>
+            <option value="A6">A6</option>
+            <option value="A7">A7</option>
+            <option value="A8">A8 (Mega)</option>
+            <option value="GPIO 34">GPIO 34 (ESP32)</option>
+            <option value="GPIO 36">GPIO 36 (ESP32)</option>
+          </select>
+        </div>
         <label><input type="checkbox" id="export-ai-mode" /> <span data-i18n="export_opt_ai">Asistencia IA</span></label>
       </div>
       <div class="code-output-area">

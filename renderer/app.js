@@ -2784,8 +2784,22 @@ function bindModalButtons() {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      generateAndShowCode();
     });
   });
+
+  document.getElementById('export-dynamic-analog')?.addEventListener('change', (e) => {
+    const wrap = document.getElementById('export-analog-pin-wrapper');
+    if (wrap) wrap.style.display = e.target.checked ? 'inline-flex' : 'none';
+    generateAndShowCode();
+  });
+
+  document.getElementById('export-analog-pin-select')?.addEventListener('change', () => {
+    generateAndShowCode();
+  });
+
+  document.getElementById('export-include-init')?.addEventListener('change', generateAndShowCode);
+  document.getElementById('export-include-comments')?.addEventListener('change', generateAndShowCode);
 
   document.getElementById('btn-generate-code').addEventListener('click', generateAndShowCode);
   document.getElementById('btn-copy-code').addEventListener('click', copyCode);
@@ -3013,7 +3027,20 @@ function openModal(id) {
 
   if (id === 'modal-open') loadProjectList();
   if (id === 'modal-widgets') initWidgetsModal();
-  if (id === 'modal-export' || id === 'modal-live-hardware') refreshArduinoPorts();
+  if (id === 'modal-export') {
+    const hasWidget = (State.elements && State.elements.some(e => e.type === 'widget')) ||
+                      (State.transformObject && State.transformObject.type === 'widget') ||
+                      State.activeWidget;
+    const chk = document.getElementById('export-dynamic-analog');
+    if (chk) {
+      if (hasWidget) chk.checked = true;
+      const wrap = document.getElementById('export-analog-pin-wrapper');
+      if (wrap) wrap.style.display = chk.checked ? 'inline-flex' : 'none';
+    }
+    refreshArduinoPorts();
+    generateAndShowCode();
+  }
+  if (id === 'modal-live-hardware') refreshArduinoPorts();
 }
 
 function closeModal(id) {
@@ -3036,7 +3063,10 @@ function stampWidgetAt(atX, atY, widgetObj) {
   if (!widgetObj || !widgetObj.bitmap) return;
   initTransformObject({
     type: 'widget',
+    widgetId: widgetObj.id,
+    widgetType: widgetObj.type,
     name: widgetObj.name,
+    params: widgetObj.params ? { ...widgetObj.params } : null,
     x: atX,
     y: atY,
     w: widgetObj.width,
@@ -3883,7 +3913,32 @@ async function generateAndShowCode() {
 
   document.getElementById('code-content').textContent = '// Generando código...';
 
-  syncActiveFrameBitmap();
+  const dynamicAnalog = document.getElementById('export-dynamic-analog')?.checked || false;
+  const analogPin = document.getElementById('export-analog-pin-select')?.value || 'A0';
+
+  const placedWidgets = (State.elements || [])
+    .filter(e => e.type === 'widget')
+    .map(e => ({
+      id: e.widgetId || e.id,
+      name: e.name,
+      x: e.x,
+      y: e.y,
+      w: e.w,
+      h: e.h,
+      params: e.params || {}
+    }));
+
+  if (State.transformObject && State.transformObject.type === 'widget') {
+    placedWidgets.push({
+      id: State.transformObject.widgetId || 'widget',
+      name: State.transformObject.name,
+      x: State.transformObject.x,
+      y: State.transformObject.y,
+      w: State.transformObject.w,
+      h: State.transformObject.h,
+      params: State.transformObject.params || {}
+    });
+  }
 
   const config = {
     platform,
@@ -3900,7 +3955,10 @@ async function generateAndShowCode() {
     frames: (State.frames && State.frames.length > 1) ? State.frames.map(f => Array.from(f.bitmap)) : null,
     fps: State.fps || 10,
     includeInit,
-    includeComments
+    includeComments,
+    dynamicAnalog,
+    analogPin,
+    widgets: placedWidgets
   };
 
   try {
@@ -3968,6 +4026,21 @@ function generateCodeLocally(config) {
 function generateArduinoAdafruit(cfg, bitmapStr, byteCount) {
   const addr = cfg.i2cAddress || '0x3C';
   const iface = cfg.interface === 'SPI' ? 'SPI' : 'I2C';
+  const isDynamicAnalog = !!cfg.dynamicAnalog;
+  const analogPin = cfg.analogPin || 'A0';
+  const widgets = Array.isArray(cfg.widgets) ? cfg.widgets : [];
+  const progBarWidget = widgets.find(w => w.id === 'prog_bar' || /barra|progress/i.test(w.name || ''));
+  const gaugeWidget = widgets.find(w => w.id === 'gauge_dial' || /tac|gauge/i.test(w.name || ''));
+
+  const pbX = progBarWidget ? Math.round(progBarWidget.x) : Math.max(0, Math.round((cfg.width - 64) / 2));
+  const pbY = progBarWidget ? Math.round(progBarWidget.y) : Math.max(0, cfg.height - 12);
+  const pbW = progBarWidget ? Math.max(16, Math.round(progBarWidget.w)) : 64;
+  const pbH = progBarWidget ? Math.max(6, Math.round(progBarWidget.h)) : 8;
+
+  const gCX = gaugeWidget ? Math.round(gaugeWidget.x + gaugeWidget.w / 2) : Math.round(cfg.width / 2);
+  const gCY = gaugeWidget ? Math.round(gaugeWidget.y + gaugeWidget.h) : Math.round(cfg.height - 4);
+  const gRadius = gaugeWidget ? Math.max(10, Math.round(gaugeWidget.w / 2)) : 16;
+
   const lines = [
     `// OLED Designer — Arduino + Adafruit GFX`,
     `// Driver: ${cfg.driver} | ${cfg.width}x${cfg.height} | ${iface}`,
@@ -3980,9 +4053,51 @@ function generateArduinoAdafruit(cfg, bitmapStr, byteCount) {
     `#define SCREEN_WIDTH  ${cfg.width}`,
     `#define SCREEN_HEIGHT ${cfg.height}`,
     `#define OLED_RESET    -1`,
-    `#define SCREEN_ADDRESS ${addr}`,
-    ``,
-    `Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);`,
+    `#define SCREEN_ADDRESS ${addr}`
+  ];
+
+  if (isDynamicAnalog) {
+    lines.push(
+      `#define SENSOR_ANALOG_PIN  ${analogPin}  // Pin analógico asignado para lectura en vivo`,
+      ``,
+      `Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);`,
+      ``,
+      gaugeWidget ?
+        `// Dibuja un Tacómetro Dial según porcentaje (0% - 100%)
+void drawGauge(int cx, int cy, int radius, int percent) {
+  percent = constrain(percent, 0, 100);
+  for (int a = 180; a <= 360; a += 6) {
+    float rad = a * 0.0174533;
+    display.drawPixel(cx + cos(rad) * radius, cy + sin(rad) * radius, SSD1306_WHITE);
+  }
+  float needleRad = (180.0 + (percent / 100.0) * 180.0) * 0.0174533;
+  int nx = cx + cos(needleRad) * (radius - 3);
+  int ny = cy + sin(needleRad) * (radius - 3);
+  display.drawLine(cx, cy, nx, ny, SSD1306_WHITE);
+  display.fillCircle(cx, cy, 2, SSD1306_WHITE);
+}`
+        :
+        `// Dibuja una Barra de Progreso dinámica según porcentaje (0% - 100%)
+void drawProgressBar(int x, int y, int w, int h, int percent) {
+  percent = constrain(percent, 0, 100);
+  display.drawRect(x, y, w, h, SSD1306_WHITE); // Borde exterior
+  int innerW = w - 4;
+  int innerH = h - 4;
+  display.fillRect(x + 2, y + 2, innerW, innerH, SSD1306_BLACK); // Limpiar interior
+  int fillW = map(percent, 0, 100, 0, innerW);
+  if (fillW > 0) {
+    display.fillRect(x + 2, y + 2, fillW, innerH, SSD1306_WHITE); // Llenado proporcional
+  }
+}`
+    );
+  } else {
+    lines.push(
+      ``,
+      `Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);`
+    );
+  }
+
+  lines.push(
     ``,
     `// Bitmap generado — ${byteCount} bytes (${cfg.width}x${cfg.height})`,
     `static const uint8_t PROGMEM oled_bitmap[] = {`,
@@ -3991,6 +4106,7 @@ function generateArduinoAdafruit(cfg, bitmapStr, byteCount) {
     ``,
     `void setup() {`,
     `  Serial.begin(115200);`,
+    isDynamicAnalog ? `  pinMode(SENSOR_ANALOG_PIN, INPUT);` : ``,
     `  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {`,
     `    Serial.println(F("Error: SSD1306 no encontrado"));`,
     `    for (;;);`,
@@ -4001,11 +4117,39 @@ function generateArduinoAdafruit(cfg, bitmapStr, byteCount) {
     `  display.display();`,
     `}`,
     ``,
-    `void loop() {`,
-    `  // Tu código aquí`,
-    `}`
-  ];
-  return lines.join('\n');
+    isDynamicAnalog ?
+      `void loop() {
+  // 1. Leer el pin analógico (${analogPin})
+  int rawValue = analogRead(SENSOR_ANALOG_PIN);
+
+  // 2. Mapear lectura analógica a porcentaje (0% - 100%)
+  int maxAdc = 1023; // Ajusta a 4095 si usas ESP32
+  int percent = map(rawValue, 0, maxAdc, 0, 100);
+  percent = constrain(percent, 0, 100);
+
+  // 3. Monitoreo por consola serial
+  Serial.print(F("Sensor [${analogPin}]: "));
+  Serial.print(rawValue);
+  Serial.print(F(" -> "));
+  Serial.print(percent);
+  Serial.println(F("%"));
+
+  // 4. Actualizar pantalla OLED con el widget dinámico
+  display.clearDisplay();
+  display.drawBitmap(0, 0, oled_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+  ${gaugeWidget ? `drawGauge(${gCX}, ${gCY}, ${gRadius}, percent);` : `drawProgressBar(${pbX}, ${pbY}, ${pbW}, ${pbH}, percent);`}
+  display.display();
+
+  delay(30); // Frecuencia de actualización (~33 FPS)
+}`
+      :
+      `void loop() {
+  // El diseño ya está activo en pantalla
+  delay(1000);
+}`
+  );
+
+  return lines.filter(Boolean).join('\n');
 }
 
 function generateU8g2(cfg, bitmapStr, byteCount) {

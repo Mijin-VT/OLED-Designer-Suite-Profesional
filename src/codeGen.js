@@ -257,11 +257,69 @@ function generateArduinoAdafruit(cfg, bytes, elemInfo, template, includeInit, in
     lines.push(``);
   }
 
+  const isDynamicAnalog = !!cfg.dynamicAnalog;
+  const analogPin = cfg.analogPin || 'A0';
+  const widgets = Array.isArray(cfg.widgets) ? cfg.widgets : [];
+  const progBarWidget = widgets.find(w => w.id === 'prog_bar' || /barra|progress/i.test(w.name || ''));
+  const gaugeWidget = widgets.find(w => w.id === 'gauge_dial' || /tac|gauge/i.test(w.name || ''));
+
+  const pbX = progBarWidget ? Math.round(progBarWidget.x) : Math.max(0, Math.round((width - 64) / 2));
+  const pbY = progBarWidget ? Math.round(progBarWidget.y) : Math.max(0, height - 12);
+  const pbW = progBarWidget ? Math.max(16, Math.round(progBarWidget.w)) : 64;
+  const pbH = progBarWidget ? Math.max(6, Math.round(progBarWidget.h)) : 8;
+
+  const gCX = gaugeWidget ? Math.round(gaugeWidget.x + gaugeWidget.w / 2) : Math.round(width / 2);
+  const gCY = gaugeWidget ? Math.round(gaugeWidget.y + gaugeWidget.h) : Math.round(height - 4);
+  const gRadius = gaugeWidget ? Math.max(10, Math.round(gaugeWidget.w / 2)) : 16;
+
+  if (isDynamicAnalog) {
+    lines.push(`// ============================================================`);
+    lines.push(`// ENTRADA ANALÓGICA: LECTURA DE SENSOR / POTENCIÓMETRO`);
+    lines.push(`// ============================================================`);
+    lines.push(`#define SENSOR_ANALOG_PIN  ${analogPin}  // Pin analógico asignado para lectura en vivo`);
+    lines.push(``);
+
+    if (gaugeWidget) {
+      lines.push(`// Dibuja un Tacómetro / Medidor Dial según porcentaje (0 - 100%)`);
+      lines.push(`void drawGauge(int cx, int cy, int radius, int percent) {`);
+      lines.push(`  percent = constrain(percent, 0, 100);`);
+      lines.push(`  for (int a = 180; a <= 360; a += 6) {`);
+      lines.push(`    float rad = a * 0.0174533;`);
+      lines.push(`    display.drawPixel(cx + cos(rad) * radius, cy + sin(rad) * radius, SSD1306_WHITE);`);
+      lines.push(`  }`);
+      lines.push(`  float needleRad = (180.0 + (percent / 100.0) * 180.0) * 0.0174533;`);
+      lines.push(`  int nx = cx + cos(needleRad) * (radius - 3);`);
+      lines.push(`  int ny = cy + sin(needleRad) * (radius - 3);`);
+      lines.push(`  display.drawLine(cx, cy, nx, ny, SSD1306_WHITE);`);
+      lines.push(`  display.fillCircle(cx, cy, 2, SSD1306_WHITE);`);
+      lines.push(`}`);
+      lines.push(``);
+    } else {
+      lines.push(`// Dibuja una Barra de Progreso dinámica según porcentaje (0 - 100%)`);
+      lines.push(`void drawProgressBar(int x, int y, int w, int h, int percent) {`);
+      lines.push(`  percent = constrain(percent, 0, 100);`);
+      lines.push(`  display.drawRect(x, y, w, h, SSD1306_WHITE);`);
+      lines.push(`  int innerW = w - 4;`);
+      lines.push(`  int innerH = h - 4;`);
+      lines.push(`  display.fillRect(x + 2, y + 2, innerW, innerH, SSD1306_BLACK);`);
+      lines.push(`  int fillW = map(percent, 0, 100, 0, innerW);`);
+      lines.push(`  if (fillW > 0) {`);
+      lines.push(`    display.fillRect(x + 2, y + 2, fillW, innerH, SSD1306_WHITE);`);
+      lines.push(`  }`);
+      lines.push(`}`);
+      lines.push(``);
+    }
+  }
+
   if (includeInit) {
     lines.push(`void setup() {`);
     lines.push(`  Serial.begin(115200);`);
     lines.push(`  delay(100);`);
     lines.push(``);
+    if (isDynamicAnalog) {
+      lines.push(`  pinMode(SENSOR_ANALOG_PIN, INPUT);`);
+      lines.push(``);
+    }
     if (comment) lines.push(`  // Inicialización de la interfaz física`);
     if (iface === 'I2C') {
       lines.push(`  Wire.begin();`);
@@ -302,6 +360,37 @@ function generateArduinoAdafruit(cfg, bytes, elemInfo, template, includeInit, in
       lines.push(`    display.display();`);
       lines.push(`    delay(FRAME_DELAY_MS);`);
       lines.push(`  }`);
+      lines.push(`}`);
+    } else if (isDynamicAnalog) {
+      lines.push(`  Serial.println(F("[OK] Display inicializado en modo dinámico con sensor analógico."));`);
+      lines.push(`}`);
+      lines.push(``);
+      lines.push(`void loop() {`);
+      lines.push(`  // 1. Leer el pin analógico (${analogPin})`);
+      lines.push(`  int rawValue = analogRead(SENSOR_ANALOG_PIN);`);
+      lines.push(``);
+      lines.push(`  // 2. Mapear lectura analógica a porcentaje (0% - 100%)`);
+      lines.push(`  int maxAdc = 1023; // Ajusta a 4095 si usas ESP32`);
+      lines.push(`  int percent = map(rawValue, 0, maxAdc, 0, 100);`);
+      lines.push(`  percent = constrain(percent, 0, 100);`);
+      lines.push(``);
+      lines.push(`  // 3. Monitoreo por consola serial`);
+      lines.push(`  Serial.print(F("Sensor [${analogPin}]: "));`);
+      lines.push(`  Serial.print(rawValue);`);
+      lines.push(`  Serial.print(F(" -> "));`);
+      lines.push(`  Serial.print(percent);`);
+      lines.push(`  Serial.println(F("%"));`);
+      lines.push(``);
+      lines.push(`  // 4. Actualizar pantalla OLED con el widget dinámico`);
+      lines.push(`  display.clearDisplay();`);
+      lines.push(`  display.drawBitmap(0, 0, oled_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);`);
+      if (gaugeWidget) {
+        lines.push(`  drawGauge(${gCX}, ${gCY}, ${gRadius}, percent);`);
+      } else {
+        lines.push(`  drawProgressBar(${pbX}, ${pbY}, ${pbW}, ${pbH}, percent);`);
+      }
+      lines.push(`  display.display();`);
+      lines.push(`  delay(30); // Frecuencia de muestreo (~33 FPS)`);
       lines.push(`}`);
     } else {
       if (comment) lines.push(`  // Limpiar buffer y dibujar diseño`);
@@ -391,18 +480,47 @@ function generateU8g2(cfg, bytes, elemInfo, template, includeInit, includeCommen
   lines.push(`};`);
   lines.push(``);
 
+  const isDynamicAnalog = !!cfg.dynamicAnalog;
+  const analogPin = cfg.analogPin || 'A0';
+  const widgets = Array.isArray(cfg.widgets) ? cfg.widgets : [];
+  const progBarWidget = widgets.find(w => w.id === 'prog_bar' || /barra|progress/i.test(w.name || ''));
+  const pbX = progBarWidget ? Math.round(progBarWidget.x) : Math.max(0, Math.round((width - 64) / 2));
+  const pbY = progBarWidget ? Math.round(progBarWidget.y) : Math.max(0, height - 12);
+  const pbW = progBarWidget ? Math.max(16, Math.round(progBarWidget.w)) : 64;
+  const pbH = progBarWidget ? Math.max(6, Math.round(progBarWidget.h)) : 8;
+
   if (includeInit) {
     lines.push(`void setup() {`);
     lines.push(`  u8g2.begin();`);
     lines.push(`  u8g2.setBusClock(400000); // 400kHz para I2C`);
+    if (isDynamicAnalog) {
+      lines.push(`  pinMode(${analogPin}, INPUT);`);
+    }
     lines.push(`}`);
     lines.push(``);
-    lines.push(`void loop() {`);
-    lines.push(`  u8g2.clearBuffer();`);
-    lines.push(`  u8g2.drawXBMP(0, 0, ${width}, ${height}, bitmap);`);
-    lines.push(`  u8g2.sendBuffer();`);
-    lines.push(`  delay(1000);`);
-    lines.push(`}`);
+    if (isDynamicAnalog) {
+      lines.push(`void loop() {`);
+      lines.push(`  int raw = analogRead(${analogPin});`);
+      lines.push(`  int percent = map(raw, 0, 1023, 0, 100);`);
+      lines.push(`  percent = constrain(percent, 0, 100);`);
+      lines.push(``);
+      lines.push(`  u8g2.clearBuffer();`);
+      lines.push(`  u8g2.drawXBMP(0, 0, ${width}, ${height}, bitmap);`);
+      lines.push(`  // Barra de progreso dinámica`);
+      lines.push(`  u8g2.drawFrame(${pbX}, ${pbY}, ${pbW}, ${pbH});`);
+      lines.push(`  int fillW = map(percent, 0, 100, 0, ${pbW} - 4);`);
+      lines.push(`  if (fillW > 0) u8g2.drawBox(${pbX} + 2, ${pbY} + 2, fillW, ${pbH} - 4);`);
+      lines.push(`  u8g2.sendBuffer();`);
+      lines.push(`  delay(30);`);
+      lines.push(`}`);
+    } else {
+      lines.push(`void loop() {`);
+      lines.push(`  u8g2.clearBuffer();`);
+      lines.push(`  u8g2.drawXBMP(0, 0, ${width}, ${height}, bitmap);`);
+      lines.push(`  u8g2.sendBuffer();`);
+      lines.push(`  delay(1000);`);
+      lines.push(`}`);
+    }
   }
 
   return lines.join('\n');

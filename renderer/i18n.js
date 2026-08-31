@@ -148,7 +148,7 @@
       project_desc_placeholder: "Descripción (opcional)",
 
       // Idioma / Language (El recuadro rojo)
-      section_language: "Idioma / Language",
+      section_language: "IDIOMA / LANGUAGE",
       lang_es: "Español",
       lang_en: "English",
 
@@ -381,7 +381,7 @@
       project_desc_placeholder: "Description (optional)",
 
       // Idioma / Language (Red Box Area)
-      section_language: "Language / Idioma",
+      section_language: "IDIOMA / LANGUAGE",
       lang_es: "Español",
       lang_en: "English",
 

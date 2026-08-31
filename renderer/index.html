@@ -249,7 +249,7 @@
 
       <!-- Opciones de Borrador -->
       <div class="tool-option-group hidden" id="opt-eraser">
-        <label>Grosor del Borrador</label>
+        <label data-i18n="label_eraser_size">Grosor del Borrador</label>
         <div class="size-buttons">
           <button class="size-btn active" data-esize="1">1px</button>
           <button class="size-btn" data-esize="2">2px</button>
@@ -257,22 +257,22 @@
           <button class="size-btn" data-esize="8">8px</button>
           <button class="size-btn" data-esize="12">12px</button>
         </div>
-        <p class="tool-tip">Consejo: Clic derecho siempre borra.</p>
+        <p class="tool-tip" data-i18n="tip_eraser">Consejo: Clic derecho siempre borra.</p>
       </div>
 
       <!-- Opciones de Texto -->
       <div class="tool-option-group hidden" id="opt-text">
-        <label>Contenido</label>
-        <input type="text" id="text-content" placeholder="Escribe aquí..." maxlength="60" value="Hola OLED" />
+        <label data-i18n="label_text_content">Contenido</label>
+        <input type="text" id="text-content" placeholder="Escribe aquí..." data-i18n-placeholder="text_placeholder" maxlength="60" value="Hola OLED" />
 
-        <label>Alineación</label>
+        <label data-i18n="label_text_align">Alineación</label>
         <div class="align-buttons">
-          <button class="align-btn active" data-talign="left" title="Alinear a la izquierda">⯇ Izq</button>
-          <button class="align-btn" data-talign="center" title="Centrado">⯈|⯇ Centro</button>
-          <button class="align-btn" data-talign="right" title="Alinear a la derecha">Der ⯈</button>
+          <button class="align-btn active" data-talign="left" title="Alinear a la izquierda" data-i18n-title="align_left_title" data-i18n="align_left">⯇ Izq</button>
+          <button class="align-btn" data-talign="center" title="Centrado" data-i18n-title="align_center_title" data-i18n="align_center">⯈|⯇ Centro</button>
+          <button class="align-btn" data-talign="right" title="Alinear a la derecha" data-i18n-title="align_right_title" data-i18n="align_right">Der ⯈</button>
         </div>
 
-        <label>Tamaño</label>
+        <label data-i18n="label_text_size">Tamaño</label>
         <div class="size-buttons">
           <button class="size-btn active" data-tsize="1">1×</button>
           <button class="size-btn" data-tsize="2">2×</button>
@@ -281,25 +281,25 @@
         </div>
 
         <div class="text-actions-row">
-          <button class="btn-action-sm" id="btn-add-text-layer" title="Crear nueva capa de texto editable">+ Capa de Texto</button>
-          <button class="btn-action-sm" id="btn-rasterize-text" title="Fundir texto en el bitmap de píxeles">Fijar al Canvas</button>
-          <button class="btn-action-sm danger" id="btn-delete-text-layer" title="Eliminar capa de texto seleccionada">Eliminar</button>
+          <button class="btn-action-sm" id="btn-add-text-layer" title="Crear nueva capa de texto editable" data-i18n="btn_add_text_layer" data-i18n-title="btn_add_text_layer_title">+ Capa de Texto</button>
+          <button class="btn-action-sm" id="btn-rasterize-text" title="Fundir texto en el bitmap de píxeles" data-i18n="btn_rasterize_text" data-i18n-title="btn_rasterize_text_title">Fijar al Canvas</button>
+          <button class="btn-action-sm danger" id="btn-delete-text-layer" title="Eliminar capa de texto seleccionada" data-i18n="btn_delete_text_layer" data-i18n-title="btn_delete_text_layer_title">Eliminar</button>
         </div>
 
-        <p class="tool-tip">💡 <strong>Doble clic</strong> en el canvas sobre el texto para editarlo o arrastrarlo.</p>
-        <label style="margin-top:6px;">Vista Previa</label>
+        <p class="tool-tip" data-i18n="tip_text">💡 Doble clic en el canvas sobre el texto para editarlo o arrastrarlo.</p>
+        <label style="margin-top:6px;" data-i18n="label_preview">Vista Previa</label>
         <canvas id="text-preview-canvas" width="120" height="30"></canvas>
       </div>
 
       <!-- Color de píxel -->
       <div class="tool-option-group" id="opt-color">
-        <label>Píxel</label>
+        <label data-i18n="label_pixel">Píxel</label>
         <div class="color-toggle">
-          <button class="color-btn active" data-color="1" title="Píxel ON (Encendido / Blanco)">
+          <button class="color-btn active" data-color="1" title="Píxel ON (Encendido / Blanco)" data-i18n-title="pixel_on_title">
             <span style="width:9px;height:9px;background:#ffffff;border:1px solid #94a3b8;border-radius:2px;display:inline-block;"></span>
             ON
           </button>
-          <button class="color-btn" data-color="0" title="Píxel OFF (Apagado / Borrar)">
+          <button class="color-btn" data-color="0" title="Píxel OFF (Apagado / Borrar)" data-i18n-title="pixel_off_title">
             <span style="width:9px;height:9px;background:#151828;border:1px solid #64748b;border-radius:2px;display:inline-block;"></span>
             OFF
           </button>
@@ -350,10 +350,10 @@
       <!-- Barra de control flotante de Transformación (Estirar / Encoger figuras y widgets) -->
       <div class="transform-hud hidden" id="transform-hud">
         <span class="transform-dim" id="transform-dim">0 × 0 px</span>
-        <button class="hud-btn hud-btn-ratio" id="btn-transform-ratio" title="Bloquear / Desbloquear proporción">🔗</button>
-        <button class="hud-btn hud-btn-apply" id="btn-transform-apply" title="Fijar figura al canvas (Enter)">✔ Aplicar</button>
-        <button class="hud-btn hud-btn-delete" id="btn-transform-delete" title="Eliminar figura del espacio de trabajo (Supr)">🗑</button>
-        <button class="hud-btn hud-btn-cancel" id="btn-transform-cancel" title="Cancelar cambios (Esc)">✖</button>
+        <button class="hud-btn hud-btn-ratio" id="btn-transform-ratio" title="Bloquear / Desbloquear proporción" data-i18n-title="hud_ratio_title">🔗</button>
+        <button class="hud-btn hud-btn-apply" id="btn-transform-apply" title="Fijar figura al canvas (Enter)" data-i18n-title="hud_apply_title" data-i18n="hud_apply">✔ Aplicar</button>
+        <button class="hud-btn hud-btn-delete" id="btn-transform-delete" title="Eliminar figura del espacio de trabajo (Supr)" data-i18n-title="hud_delete_title">🗑</button>
+        <button class="hud-btn hud-btn-cancel" id="btn-transform-cancel" title="Cancelar cambios (Esc)" data-i18n-title="hud_cancel_title">✖</button>
       </div>
     </div>
 
@@ -369,11 +369,11 @@
     <div class="timeline-container hidden" id="timeline-container">
       <div class="timeline-toolbar">
         <div class="timeline-group">
-          <button class="tl-btn" id="tl-btn-first" title="Primer fotograma (Home)">⏮</button>
-          <button class="tl-btn" id="tl-btn-prev" title="Fotograma anterior (←)">◀</button>
-          <button class="tl-btn tl-btn-play" id="tl-btn-play" title="Reproducir / Pausar (Espacio)">▶</button>
-          <button class="tl-btn" id="tl-btn-next" title="Fotograma siguiente (→)">▶</button>
-          <button class="tl-btn" id="tl-btn-last" title="Último fotograma (End)">⏭</button>
+          <button class="tl-btn" id="tl-btn-first" title="Primer fotograma (Home)" data-i18n-title="tl_first_title">⏮</button>
+          <button class="tl-btn" id="tl-btn-prev" title="Fotograma anterior (←)" data-i18n-title="tl_prev_title">◀</button>
+          <button class="tl-btn tl-btn-play" id="tl-btn-play" title="Reproducir / Pausar (Espacio)" data-i18n-title="tl_play_title">▶</button>
+          <button class="tl-btn" id="tl-btn-next" title="Fotograma siguiente (→)" data-i18n-title="tl_next_title">▶</button>
+          <button class="tl-btn" id="tl-btn-last" title="Último fotograma (End)" data-i18n-title="tl_last_title">⏭</button>
         </div>
 
         <div class="timeline-separator"></div>
@@ -395,10 +395,10 @@
         <div class="timeline-separator"></div>
 
         <div class="timeline-group">
-          <button class="tl-toggle-btn" id="tl-btn-onion" title="Papel Cebolla: Muestra el fotograma anterior con tenue resplandor naranja">
+          <button class="tl-toggle-btn" id="tl-btn-onion" title="Papel Cebolla: Muestra el fotograma anterior con tenue resplandor naranja" data-i18n-title="tl_onion_title" data-i18n="tl_onion">
             🧅 Cebolla
           </button>
-          <button class="tl-toggle-btn active" id="tl-btn-loop" title="Bucle continuo de animación">
+          <button class="tl-toggle-btn active" id="tl-btn-loop" title="Bucle continuo de animación" data-i18n-title="tl_loop_title" data-i18n="tl_loop">
             🔁 Bucle
           </button>
         </div>
@@ -406,16 +406,16 @@
         <div class="timeline-separator"></div>
 
         <div class="timeline-group">
-          <button class="tl-action-btn" id="tl-btn-add" title="Agregar fotograma nuevo en blanco">+ Frame</button>
-          <button class="tl-action-btn" id="tl-btn-dup" title="Duplicar fotograma actual para continuar el movimiento">⧉ Duplicar</button>
-          <button class="tl-action-btn tl-btn-danger" id="tl-btn-del" title="Eliminar fotograma actual">🗑 Borrar</button>
+          <button class="tl-action-btn" id="tl-btn-add" title="Agregar fotograma nuevo en blanco" data-i18n-title="tl_add_title" data-i18n="tl_add">+ Frame</button>
+          <button class="tl-action-btn" id="tl-btn-dup" title="Duplicar fotograma actual para continuar el movimiento" data-i18n-title="tl_dup_title" data-i18n="tl_dup">⧉ Duplicar</button>
+          <button class="tl-action-btn tl-btn-danger" id="tl-btn-del" title="Eliminar fotograma actual" data-i18n-title="tl_del_title" data-i18n="tl_del">🗑 Borrar</button>
         </div>
 
         <div class="timeline-group timeline-right">
-          <button class="tl-action-btn tl-btn-accent" id="tl-btn-export-anim" title="Generar código animado para Arduino / U8g2 / MicroPython">
+          <button class="tl-action-btn tl-btn-accent" id="tl-btn-export-anim" title="Generar código animado para Arduino / U8g2 / MicroPython" data-i18n-title="tl_export_anim_title" data-i18n="tl_export_anim">
             🎬 Exportar Animación
           </button>
-          <button class="tl-btn-close" id="tl-btn-close" title="Ocultar línea de tiempo">×</button>
+          <button class="tl-btn-close" id="tl-btn-close" title="Ocultar línea de tiempo" data-i18n-title="tl_close_title">×</button>
         </div>
       </div>
 
@@ -428,20 +428,20 @@
     <!-- Panel de vista previa (mini) -->
     <div class="preview-panel" id="preview-panel">
       <div class="preview-panel-header">
-        <span>Vista Previa</span>
-        <button id="btn-close-preview" title="Cerrar">×</button>
+        <span data-i18n="preview_window_title">Vista Previa</span>
+        <button id="btn-close-preview" title="Cerrar" data-i18n-title="btn_close_title">×</button>
       </div>
       <div class="preview-display" id="preview-display">
         <canvas id="preview-canvas"></canvas>
       </div>
       <div class="preview-controls">
         <select id="preview-color-override">
-          <option value="">Color del panel →</option>
-          <option value="white">Blanco</option>
-          <option value="blue">Azul</option>
-          <option value="yellow">Amarillo</option>
-          <option value="rgb">RGB</option>
-          <option value="green">Verde</option>
+          <option value="" data-i18n="panel_color_override">Color del panel →</option>
+          <option value="white" data-i18n="color_opt_white">Blanco</option>
+          <option value="blue" data-i18n="color_opt_blue">Azul</option>
+          <option value="yellow" data-i18n="color_opt_yellow">Amarillo</option>
+          <option value="rgb" data-i18n="color_opt_rgb">RGB</option>
+          <option value="green" data-i18n="color_opt_green">Verde</option>
         </select>
       </div>
     </div>
@@ -593,31 +593,31 @@
 <div class="modal-overlay hidden" id="modal-export">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>Exportar Código</h2>
+      <h2 data-i18n="modal_export_title">Exportar Código</h2>
       <button class="modal-close" data-close="modal-export">×</button>
     </div>
     <div class="modal-body">
       <div class="export-platforms">
-        <button class="platform-btn active" data-platform="arduino_adafruit">Arduino / Adafruit GFX</button>
-        <button class="platform-btn" data-platform="u8g2">U8g2</button>
-        <button class="platform-btn" data-platform="c_array">C Array (Bitmap)</button>
-        <button class="platform-btn" data-platform="micropython">MicroPython</button>
-        <button class="platform-btn" data-platform="circuitpython">CircuitPython</button>
-        <button class="platform-btn" data-platform="javascript">JavaScript / TS</button>
-        <button class="platform-btn" data-platform="rust">Rust</button>
+        <button class="platform-btn active" data-platform="arduino_adafruit" data-i18n="modal_export_tabs_arduino">Arduino / Adafruit GFX</button>
+        <button class="platform-btn" data-platform="u8g2" data-i18n="modal_export_tabs_u8g2">U8g2</button>
+        <button class="platform-btn" data-platform="c_array" data-i18n="modal_export_tabs_carray">C Array (Bitmap)</button>
+        <button class="platform-btn" data-platform="micropython" data-i18n="modal_export_tabs_micropython">MicroPython</button>
+        <button class="platform-btn" data-platform="circuitpython" data-i18n="modal_export_tabs_circuitpython">CircuitPython</button>
+        <button class="platform-btn" data-platform="javascript" data-i18n="modal_export_tabs_js">JavaScript / TS</button>
+        <button class="platform-btn" data-platform="rust" data-i18n="modal_export_tabs_rust">Rust</button>
       </div>
       <div class="export-options">
-        <label><input type="checkbox" id="export-include-init" checked /> Incluir inicialización</label>
-        <label><input type="checkbox" id="export-include-comments" checked /> Incluir comentarios</label>
-        <label><input type="checkbox" id="export-ai-mode" /> Asistencia IA</label>
+        <label><input type="checkbox" id="export-include-init" checked /> <span data-i18n="export_opt_init">Incluir inicialización</span></label>
+        <label><input type="checkbox" id="export-include-comments" checked /> <span data-i18n="export_opt_comments">Incluir comentarios</span></label>
+        <label><input type="checkbox" id="export-ai-mode" /> <span data-i18n="export_opt_ai">Asistencia IA</span></label>
       </div>
       <div class="code-output-area">
         <div class="code-toolbar">
           <span id="export-platform-label">Arduino + Adafruit GFX</span>
           <div class="code-actions">
-            <button id="btn-generate-code" class="btn-primary-sm">Generar ↻</button>
-            <button id="btn-copy-code" class="btn-sm">Copiar</button>
-            <button id="btn-save-code" class="btn-sm">Guardar .ino</button>
+            <button id="btn-generate-code" class="btn-primary-sm" data-i18n="btn_generate_code">Generar ↻</button>
+            <button id="btn-copy-code" class="btn-sm" data-i18n="btn_copy_code">Copiar</button>
+            <button id="btn-save-code" class="btn-sm" data-i18n="btn_save_code">Guardar .ino</button>
           </div>
         </div>
         <pre id="code-output"><code id="code-content">// Haz clic en "Generar" para crear el código...</code></pre>
@@ -625,21 +625,21 @@
         <!-- Panel de Carga Directa a Arduino -->
         <div class="arduino-upload-panel" id="arduino-upload-panel">
           <div class="arduino-upload-header">
-            <span class="arduino-badge">⚡ Subir a Placa Arduino</span>
-            <span class="arduino-status-badge" id="arduino-detected-label">Buscando placas...</span>
+            <span class="arduino-badge" data-i18n="arduino_badge">⚡ Subir a Placa Arduino</span>
+            <span class="arduino-status-badge" id="arduino-detected-label" data-i18n="arduino_detecting">Buscando placas...</span>
           </div>
           <div class="arduino-upload-controls">
             <div class="arduino-control-item" style="flex: 1.2;">
-              <label>Puerto COM Arduino:</label>
+              <label data-i18n="label_arduino_port">Puerto COM Arduino:</label>
               <div class="port-select-wrapper">
                 <select id="arduino-port-select" class="form-select">
-                  <option value="">Detectando puertos...</option>
+                  <option value="" data-i18n="arduino_detecting_ports">Detectando puertos...</option>
                 </select>
-                <button id="btn-refresh-arduino-ports" class="btn-icon" title="Volver a escanear puertos COM">↻</button>
+                <button id="btn-refresh-arduino-ports" class="btn-icon" title="Volver a escanear puertos COM" data-i18n-title="btn_refresh_ports_title">↻</button>
               </div>
             </div>
             <div class="arduino-control-item">
-              <label>Modelo de Placa:</label>
+              <label data-i18n="label_arduino_board">Modelo de Placa:</label>
               <select id="arduino-board-select" class="form-select">
                 <option value="arduino:avr:mega">Arduino Mega or Mega 2560 (ATmega2560)</option>
                 <option value="arduino:avr:uno">Arduino Uno (ATmega328P)</option>
@@ -648,13 +648,13 @@
               </select>
             </div>
             <div class="arduino-control-buttons">
-              <button id="btn-upload-arduino" class="btn-primary-sm btn-upload">⚡ Subir a Placa</button>
-              <button id="btn-open-arduino-ide" class="btn-sm" title="Abrir sketch .ino en Arduino IDE">Abrir en Arduino IDE</button>
+              <button id="btn-upload-arduino" class="btn-primary-sm btn-upload" data-i18n="btn_upload_board">⚡ Subir a Placa</button>
+              <button id="btn-open-arduino-ide" class="btn-sm" title="Abrir sketch .ino en Arduino IDE" data-i18n="btn_open_ide" data-i18n-title="btn_open_ide_title">Abrir en Arduino IDE</button>
             </div>
           </div>
           <div class="i2c-detected-card" id="export-i2c-card" style="margin-top: 8px;">
             <div class="i2c-card-header">
-              <span class="i2c-tag">🔌 Pines I2C Identificados</span>
+              <span class="i2c-tag" data-i18n="i2c_identified_tag">🔌 Pines I2C Identificados</span>
               <span class="i2c-board-name" id="export-i2c-board-name">Arduino Mega 2560</span>
             </div>
             <div class="i2c-pins-grid">
@@ -690,21 +690,21 @@
 <div class="modal-overlay hidden" id="modal-open">
   <div class="modal">
     <div class="modal-header">
-      <h2>Abrir Proyecto</h2>
+      <h2 data-i18n="modal_open_title">Abrir Proyecto</h2>
       <button class="modal-close" data-close="modal-open">×</button>
     </div>
     <div class="modal-body">
       <div class="open-tabs">
-        <button class="tab-btn active" data-tab="db">Base de Datos</button>
-        <button class="tab-btn" data-tab="file">Archivo</button>
+        <button class="tab-btn active" data-tab="db" data-i18n="tab_db">Base de Datos</button>
+        <button class="tab-btn" data-tab="file" data-i18n="tab_file">Archivo</button>
       </div>
       <div class="tab-content" id="tab-db">
         <div class="project-list" id="project-list">
-          <div class="loading-spinner">Cargando proyectos...</div>
+          <div class="loading-spinner" data-i18n="loading_projects">Cargando proyectos...</div>
         </div>
       </div>
       <div class="tab-content hidden" id="tab-file">
-        <button class="btn-action" id="btn-browse-file">Explorar archivo (.oled / .json)...</button>
+        <button class="btn-action" id="btn-browse-file" data-i18n="btn_browse_file">Explorar archivo (.oled / .json)...</button>
       </div>
     </div>
   </div>
@@ -714,12 +714,12 @@
 <div class="modal-overlay hidden" id="modal-versions">
   <div class="modal">
     <div class="modal-header">
-      <h2>Historial de Versiones</h2>
+      <h2 data-i18n="modal_versions_title">Historial de Versiones</h2>
       <button class="modal-close" data-close="modal-versions">×</button>
     </div>
     <div class="modal-body">
       <div class="version-list" id="version-list">
-        <div class="loading-spinner">Cargando...</div>
+        <div class="loading-spinner" data-i18n="loading">Cargando...</div>
       </div>
     </div>
   </div>
@@ -729,33 +729,33 @@
 <div class="modal-overlay hidden" id="modal-hardware">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>📟 Simulación de Pantalla en Hardware Físico</h2>
+      <h2 data-i18n="modal_hw_sim_title">📟 Simulación de Pantalla en Hardware Físico</h2>
       <button class="modal-close" data-close="modal-hardware">×</button>
     </div>
     <div class="modal-body">
       <div class="hw-controls-bar">
         <div class="hw-control-group">
-          <label>Color OLED:</label>
+          <label data-i18n="label_oled_color">Color OLED:</label>
           <div class="hw-color-pills">
-            <button class="hw-pill active" data-hwcolor="white">⚪ Blanco</button>
-            <button class="hw-pill" data-hwcolor="blue">🔵 Azul</button>
-            <button class="hw-pill" data-hwcolor="yellow">🟡 Amarillo</button>
-            <button class="hw-pill" data-hwcolor="yellow_blue">🟡/🔵 Amarillo + Azul</button>
-            <button class="hw-pill" data-hwcolor="green">🟢 Verde</button>
-            <button class="hw-pill" data-hwcolor="rgb">🌈 RGB</button>
+            <button class="hw-pill active" data-hwcolor="white" data-i18n="hw_color_white">⚪ Blanco</button>
+            <button class="hw-pill" data-hwcolor="blue" data-i18n="hw_color_blue">🔵 Azul</button>
+            <button class="hw-pill" data-hwcolor="yellow" data-i18n="hw_color_yellow">🟡 Amarillo</button>
+            <button class="hw-pill" data-hwcolor="yellow_blue" data-i18n="hw_color_yellow_blue">🟡/🔵 Amarillo + Azul</button>
+            <button class="hw-pill" data-hwcolor="green" data-i18n="hw_color_green">🟢 Verde</button>
+            <button class="hw-pill" data-hwcolor="rgb" data-i18n="hw_color_rgb">🌈 RGB</button>
           </div>
         </div>
         <div class="hw-control-group">
-          <label>Módulo PCB:</label>
+          <label data-i18n="label_pcb_module">Módulo PCB:</label>
           <select id="hw-pcb-style">
-            <option value="blue">PCB Azul (Clásico I2C)</option>
-            <option value="black">PCB Negro Mate</option>
-            <option value="purple">PCB Púrpura</option>
+            <option value="blue" data-i18n="pcb_blue">PCB Azul (Clásico I2C)</option>
+            <option value="black" data-i18n="pcb_black">PCB Negro Mate</option>
+            <option value="purple" data-i18n="pcb_purple">PCB Púrpura</option>
           </select>
         </div>
         <div class="hw-control-actions">
-          <button class="btn-sm" id="btn-copy-hw-photo">Copiar Imagen</button>
-          <button class="btn-primary-sm" id="btn-download-hw-photo">Descargar Foto</button>
+          <button class="btn-sm" id="btn-copy-hw-photo" data-i18n="btn_copy_image">Copiar Imagen</button>
+          <button class="btn-primary-sm" id="btn-download-hw-photo" data-i18n="btn_download_photo">Descargar Foto</button>
         </div>
       </div>
 
@@ -800,20 +800,20 @@
 <div class="modal-overlay hidden" id="modal-widgets">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>🧩 Biblioteca de Widgets e Iconos Monocromo</h2>
+      <h2 data-i18n="modal_widgets_title">🧩 Biblioteca de Widgets e Iconos Monocromo</h2>
       <button class="modal-close" data-close="modal-widgets">×</button>
     </div>
     <div class="modal-body">
       <!-- Barra superior del modal: Buscador y Categorías -->
       <div class="widget-search-bar">
-        <input type="text" id="widget-search-input" placeholder="Buscar icono o widget (ej: wifi, batería, reloj, barra, dial)..." />
+        <input type="text" id="widget-search-input" placeholder="Buscar icono o widget (ej: wifi, batería, reloj, barra, dial)..." data-i18n-placeholder="widget_search_placeholder" />
         <div class="widget-cat-tabs">
-          <button class="wcat-btn active" data-cat="all">Todos</button>
-          <button class="wcat-btn" data-cat="parametric">⚡ Widgets Pro</button>
-          <button class="wcat-btn" data-cat="hardware">Hardware & Bat</button>
-          <button class="wcat-btn" data-cat="sensores">Sensores</button>
-          <button class="wcat-btn" data-cat="sistema">Sistema</button>
-          <button class="wcat-btn" data-cat="navegacion">Navegación</button>
+          <button class="wcat-btn active" data-cat="all" data-i18n="wcat_all">Todos</button>
+          <button class="wcat-btn" data-cat="parametric" data-i18n="wcat_parametric">⚡ Widgets Pro</button>
+          <button class="wcat-btn" data-cat="hardware" data-i18n="wcat_hardware">Hardware & Bat</button>
+          <button class="wcat-btn" data-cat="sensores" data-i18n="wcat_sensors">Sensores</button>
+          <button class="wcat-btn" data-cat="sistema" data-i18n="wcat_system">Sistema</button>
+          <button class="wcat-btn" data-cat="navegacion" data-i18n="wcat_navigation">Navegación</button>
         </div>
       </div>
 
@@ -826,7 +826,7 @@
 
         <!-- Panel lateral del widget seleccionado -->
         <div class="widget-preview-panel">
-          <div class="wpreview-title" id="wpreview-title">Selecciona un elemento</div>
+          <div class="wpreview-title" id="wpreview-title" data-i18n="wpreview_select_prompt">Selecciona un elemento</div>
           <div class="wpreview-box">
             <canvas id="widget-preview-canvas" width="128" height="64"></canvas>
           </div>
@@ -835,20 +835,20 @@
           <!-- Controles de parámetros para widgets editables -->
           <div class="widget-param-controls hidden" id="widget-param-controls">
             <div class="param-row">
-              <label>Valor / Nivel: <span id="lbl-param-val">65</span>%</label>
+              <label><span data-i18n="label_widget_val">Valor / Nivel:</span> <span id="lbl-param-val">65</span>%</label>
               <input type="range" id="rng-widget-val" min="0" max="100" value="65" />
             </div>
             <div class="param-row" id="row-param-style">
-              <label>Estilo:</label>
+              <label data-i18n="label_widget_style">Estilo:</label>
               <select id="sel-widget-style">
-                <option value="solid">Sólido continuo</option>
-                <option value="segmented">Segmentado (VU meter)</option>
+                <option value="solid" data-i18n="widget_style_solid">Sólido continuo</option>
+                <option value="segmented" data-i18n="widget_style_segmented">Segmentado (VU meter)</option>
               </select>
             </div>
           </div>
 
           <div class="wpreview-actions">
-            <button class="btn-primary btn-full" id="btn-insert-widget">Insertar en Canvas</button>
+            <button class="btn-primary btn-full" id="btn-insert-widget" data-i18n="btn_insert_widget">Insertar en Canvas</button>
           </div>
         </div>
       </div>
@@ -860,7 +860,7 @@
 <div class="modal-overlay hidden" id="modal-menu-designer">
   <div class="modal modal-xlarge">
     <div class="modal-header">
-      <h2>📑 Generador y Simulador de Menús OLED</h2>
+      <h2 data-i18n="modal_menu_title">📑 Generador y Simulador de Menús OLED</h2>
       <button class="modal-close" data-close="modal-menu-designer">×</button>
     </div>
     <div class="modal-body">
@@ -868,23 +868,23 @@
         <!-- Columna Izquierda: Configuración y Lista de Ítems -->
         <div class="menu-config-col">
           <div class="menu-panel-card">
-            <div class="menu-card-title">Configuración del Menú</div>
+            <div class="menu-card-title" data-i18n="menu_config_title">Configuración del Menú</div>
             <div class="menu-form-row">
-              <label>Título de Cabecera:</label>
-              <input type="text" id="menu-header-title" value="AJUSTES" placeholder="Ej: MENU, AJUSTES..." />
+              <label data-i18n="menu_header_label">Título de Cabecera:</label>
+              <input type="text" id="menu-header-title" value="AJUSTES" placeholder="Ej: MENU, AJUSTES..." data-i18n-placeholder="menu_header_placeholder" />
             </div>
             <div class="menu-form-row">
-              <label>Estilo Visual:</label>
+              <label data-i18n="menu_style_label">Estilo Visual:</label>
               <select id="menu-style-select">
-                <option value="inverted">Barra Invertida (Resaltado)</option>
-                <option value="arrow">Flecha Cursor ( > Opción )</option>
-                <option value="dot">Punto / Bullet ( ● Opción )</option>
-                <option value="boxed">Caja con Borde</option>
+                <option value="inverted" data-i18n="menu_style_inverted">Barra Invertida (Resaltado)</option>
+                <option value="arrow" data-i18n="menu_style_arrow">Flecha Cursor ( > Opción )</option>
+                <option value="dot" data-i18n="menu_style_dot">Punto / Bullet ( ● Opción )</option>
+                <option value="boxed" data-i18n="menu_style_boxed">Caja con Borde</option>
               </select>
             </div>
             <div class="menu-form-row">
               <label class="checkbox-label">
-                <input type="checkbox" id="menu-chk-scrollbar" checked /> Barra de Scroll lateral
+                <input type="checkbox" id="menu-chk-scrollbar" checked /> <span data-i18n="menu_scrollbar_label">Barra de Scroll lateral</span>
               </label>
             </div>
           </div>
@@ -892,8 +892,8 @@
           <!-- Editor de Ítems -->
           <div class="menu-panel-card" style="flex: 1; display: flex; flex-direction: column;">
             <div class="menu-card-title-row">
-              <span class="menu-card-title">Ítems del Menú</span>
-              <button class="btn-action-sm" id="btn-add-menu-item">+ Ítem</button>
+              <span class="menu-card-title" data-i18n="menu_items_title">Ítems del Menú</span>
+              <button class="btn-action-sm" id="btn-add-menu-item" data-i18n="btn_add_item">+ Ítem</button>
             </div>
             <div class="menu-items-list" id="menu-items-list">
               <!-- Lista de ítems generados dinámicamente -->
@@ -921,13 +921,13 @@
               <button class="sim-btn sim-btn-down" id="sim-btn-down" title="Abajo (S / ↓)">▼</button>
             </div>
             <div class="sim-keypad-hint">
-              <span>Navega con <b>↑ / ↓</b>, activa con <b>Enter</b>, ajusta valores con <b>← / →</b>.</span>
+              <span data-i18n="sim_keypad_hint">Navega con <b>↑ / ↓</b>, activa con <b>Enter</b>, ajusta valores con <b>← / →</b>.</span>
             </div>
           </div>
 
           <div class="sim-actions-row">
-            <button class="btn-secondary" id="btn-stamp-menu" title="Copiar estado actual del menú al editor principal">Estampar en Canvas</button>
-            <button class="btn-primary" id="btn-gen-menu-code" title="Ver o copiar el código de navegación C++ / Python">Exportar Código</button>
+            <button class="btn-secondary" id="btn-stamp-menu" title="Copiar estado actual del menú al editor principal" data-i18n="btn_stamp_menu">Estampar en Canvas</button>
+            <button class="btn-primary" id="btn-gen-menu-code" title="Ver o copiar el código de navegación C++ / Python" data-i18n="btn_export_code">Exportar Código</button>
           </div>
         </div>
 
@@ -938,7 +938,7 @@
               <button class="tplat-btn active" data-tplat="arduino">Arduino C++</button>
               <button class="tplat-btn" data-tplat="python">MicroPython</button>
             </div>
-            <button class="btn-action-sm" id="btn-copy-menu-code">Copiar</button>
+            <button class="btn-action-sm" id="btn-copy-menu-code" data-i18n="btn_copy">Copiar</button>
           </div>
           <pre class="menu-code-preview" id="menu-code-preview"><code>// Código generado del menú...</code></pre>
         </div>
@@ -951,7 +951,7 @@
 <div class="modal-overlay hidden" id="modal-gif-import">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>🖼️ Importar Animación (GIF / Video) con Dithering</h2>
+      <h2 data-i18n="modal_gif_title">🖼️ Importar Animación (GIF / Video) con Dithering</h2>
       <button class="modal-close" data-close="modal-gif-import">×</button>
     </div>
     <div class="modal-body">
@@ -959,41 +959,41 @@
         <div class="media-drop-col">
           <div class="gif-drop-zone" id="gif-drop-zone">
             <div style="font-size: 36px; margin-bottom: 8px;">🎬</div>
-            <div style="font-weight: 600; margin-bottom: 4px;">Arrastra un archivo GIF o Video (MP4 / WebM)</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Se descompondrá en fotogramas a la resolución activa</div>
-            <button class="btn-secondary" type="button">Seleccionar Archivo</button>
+            <div style="font-weight: 600; margin-bottom: 4px;" data-i18n="gif_drop_prompt">Arrastra un archivo GIF o Video (MP4 / WebM)</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;" data-i18n="gif_drop_sub">Se descompondrá en fotogramas a la resolución activa</div>
+            <button class="btn-secondary" type="button" data-i18n="btn_choose_file">Seleccionar Archivo</button>
             <input type="file" id="gif-file-input" accept=".gif,video/mp4,video/webm,image/*" style="display:none;" />
           </div>
-          <div class="gif-import-status" id="gif-import-status">Ningún archivo seleccionado</div>
+          <div class="gif-import-status" id="gif-import-status" data-i18n="gif_status_none">Ningún archivo seleccionado</div>
         </div>
         <div class="media-options-col">
           <div class="media-options-box">
-            <div class="menu-card-title">Opciones de Conversión 1-Bit</div>
+            <div class="menu-card-title" data-i18n="gif_options_title">Opciones de Conversión 1-Bit</div>
             <div class="menu-form-row">
-              <label>Umbral de Binarización: <b id="gif-threshold-val">128</b></label>
+              <label><span data-i18n="gif_threshold_label">Umbral de Binarización:</span> <b id="gif-threshold-val">128</b></label>
               <input type="range" id="gif-threshold-range" min="1" max="254" value="128" />
             </div>
             <div class="menu-form-row">
               <label class="checkbox-label">
-                <input type="checkbox" id="gif-dither-check" checked /> Dithering Floyd-Steinberg (Gradientes suaves)
+                <input type="checkbox" id="gif-dither-check" checked /> <span data-i18n="gif_dither_label">Dithering Floyd-Steinberg (Gradientes suaves)</span>
               </label>
             </div>
             <div class="menu-form-row">
               <label class="checkbox-label">
-                <input type="checkbox" id="gif-contrast-check" checked /> Auto-Contraste de Histograma
+                <input type="checkbox" id="gif-contrast-check" checked /> <span data-i18n="gif_contrast_label">Auto-Contraste de Histograma</span>
               </label>
             </div>
             <div class="menu-form-row">
               <label class="checkbox-label">
-                <input type="checkbox" id="gif-invert-check" /> Invertir Colores (Líneas oscuras en fondo claro)
+                <input type="checkbox" id="gif-invert-check" /> <span data-i18n="gif_invert_label">Invertir Colores (Líneas oscuras en fondo claro)</span>
               </label>
             </div>
           </div>
           <div class="media-preview-box">
-            <div class="menu-card-title">Previsualización OLED</div>
+            <div class="menu-card-title" data-i18n="gif_preview_title">Previsualización OLED</div>
             <canvas id="gif-preview-canvas" width="128" height="64"></canvas>
           </div>
-          <button class="btn-primary btn-full" id="btn-apply-imported-frames">Aplicar Fotogramas a Línea de Tiempo</button>
+          <button class="btn-primary btn-full" id="btn-apply-imported-frames" data-i18n="btn_apply_gif">Aplicar Fotogramas a Línea de Tiempo</button>
         </div>
       </div>
     </div>
@@ -1004,16 +1004,16 @@
 <div class="modal-overlay hidden" id="modal-qr-code">
   <div class="modal">
     <div class="modal-header">
-      <h2>🏁 Generador de Códigos QR 1-Bit</h2>
+      <h2 data-i18n="modal_qr_title">🏁 Generador de Códigos QR 1-Bit</h2>
       <button class="modal-close" data-close="modal-qr-code">×</button>
     </div>
     <div class="modal-body">
       <div class="menu-form-row" style="margin-bottom: 12px;">
-        <label>Texto, URL o Credenciales WiFi:</label>
-        <input type="text" id="qr-text-input" value="https://github.com" placeholder="Ej: https://... o WIFI:S:Red;P:pass;;" />
+        <label data-i18n="qr_text_label">Texto, URL o Credenciales WiFi:</label>
+        <input type="text" id="qr-text-input" value="https://github.com" placeholder="Ej: https://... o WIFI:S:Red;P:pass;;" data-i18n-placeholder="qr_text_placeholder" />
       </div>
       <div class="menu-form-row" style="margin-bottom: 12px;">
-        <label>Escala de Módulo:</label>
+        <label data-i18n="qr_scale_label">Escala de Módulo:</label>
         <select id="qr-scale-select">
           <option value="1">1x (Muy compacto)</option>
           <option value="2" selected>2x (Estándar para 128x64)</option>
@@ -1024,8 +1024,8 @@
         <canvas id="qr-preview-canvas" width="128" height="64" style="image-rendering: pixelated;"></canvas>
       </div>
       <div style="display: flex; gap: 8px;">
-        <button class="btn-secondary" style="flex: 1;" id="btn-stamp-qr">Estampar en Canvas</button>
-        <button class="btn-primary" style="flex: 1;" id="btn-qr-add-frame">+ Como Nuevo Fotograma</button>
+        <button class="btn-secondary" style="flex: 1;" id="btn-stamp-qr" data-i18n="btn_stamp_menu">Estampar en Canvas</button>
+        <button class="btn-primary" style="flex: 1;" id="btn-qr-add-frame" data-i18n="btn_qr_new_frame">+ Como Nuevo Fotograma</button>
       </div>
     </div>
   </div>
@@ -1035,19 +1035,19 @@
 <div class="modal-overlay hidden" id="modal-anim-templates">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>📦 Plantillas y Diseños Animados para OLED</h2>
+      <h2 data-i18n="modal_anim_title">📦 Plantillas y Diseños Animados para OLED</h2>
       <button class="modal-close" data-close="modal-anim-templates">×</button>
     </div>
     <div class="modal-body">
       <div class="widget-search-bar" style="margin-bottom: 12px;">
-        <input type="text" id="anim-search-input" placeholder="Buscar animación (ej: reloj, pacman, matrix, wifi, corazon, ojos, lluvia)..." />
+        <input type="text" id="anim-search-input" placeholder="Buscar animación (ej: reloj, pacman, matrix, wifi, corazon, ojos, lluvia)..." data-i18n-placeholder="anim_search_placeholder" />
         <div class="widget-cat-tabs" id="anim-cat-tabs">
-          <button class="wcat-btn anim-cat-btn active" data-acat="all">Todos</button>
-          <button class="wcat-btn anim-cat-btn" data-acat="robot">🤖 Ojos & Caras</button>
-          <button class="wcat-btn anim-cat-btn" data-acat="dashboard">⌚ Relojes & Dash</button>
-          <button class="wcat-btn anim-cat-btn" data-acat="fx">✨ Efectos & FX</button>
-          <button class="wcat-btn anim-cat-btn" data-acat="hardware">🔋 Hardware & Señal</button>
-          <button class="wcat-btn anim-cat-btn" data-acat="games">🎮 Juegos & Retro</button>
+          <button class="wcat-btn anim-cat-btn active" data-acat="all" data-i18n="cat_all">Todos</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="robot" data-i18n="cat_robot">🤖 Ojos & Caras</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="dashboard" data-i18n="cat_dashboard">⌚ Relojes & Dash</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="fx" data-i18n="cat_fx">✨ Efectos & FX</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="hardware" data-i18n="cat_hardware">🔋 Hardware & Señal</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="games" data-i18n="cat_games">🎮 Juegos & Retro</button>
         </div>
       </div>
       <div class="anim-templates-grid" id="anim-templates-grid">
@@ -1061,7 +1061,7 @@
 <div class="modal-overlay hidden" id="modal-live-hardware">
   <div class="modal modal-large">
     <div class="modal-header">
-      <h2>🔌 Transmisión en Vivo a Display Físico</h2>
+      <h2 data-i18n="modal_hw_title">🔌 Transmisión en Vivo a Display Físico</h2>
       <button class="modal-close" data-close="modal-live-hardware">×</button>
     </div>
     <div class="modal-body">
@@ -1069,24 +1069,24 @@
         <div class="hw-stream-left">
           <div class="hw-stream-status-box">
             <span class="hw-dot offline" id="hw-stream-dot"></span>
-            <span id="hw-stream-status" style="font-weight: 600;">Desconectado</span>
+            <span id="hw-stream-status" style="font-weight: 600;" data-i18n="hw_status_disconnected">Desconectado</span>
           </div>
 
           <div class="menu-panel-card">
-            <div class="menu-card-title">Opción 1: Conexión USB Serial (COM)</div>
+            <div class="menu-card-title" data-i18n="hw_opt1_title">Opción 1: Conexión USB Serial (COM)</div>
             <div class="menu-form-row" style="margin-top: 6px; margin-bottom: 8px;">
-              <label>Puerto COM Arduino:</label>
+              <label data-i18n="label_arduino_port">Puerto COM Arduino:</label>
               <div style="display: flex; gap: 6px;">
                 <select id="hw-serial-port-select" class="form-select" style="flex:1;">
-                  <option value="">Detectando puertos...</option>
+                  <option value="" data-i18n="arduino_detecting_ports">Detectando puertos...</option>
                 </select>
-                <button id="btn-hw-refresh-ports" class="btn-icon" title="Volver a escanear puertos COM">↻</button>
+                <button id="btn-hw-refresh-ports" class="btn-icon" title="Volver a escanear puertos COM" data-i18n-title="btn_refresh_ports_title">↻</button>
               </div>
             </div>
-            <button class="btn-primary btn-full" id="btn-hw-connect-serial">Conectar USB (Serial)</button>
+            <button class="btn-primary btn-full" id="btn-hw-connect-serial" data-i18n="btn_hw_connect">Conectar USB (Serial)</button>
             <div class="i2c-detected-card" id="hw-i2c-card">
               <div class="i2c-card-header">
-                <span class="i2c-tag">🔌 Pines I2C Detectados</span>
+                <span class="i2c-tag" data-i18n="i2c_identified_tag">🔌 Pines I2C Detectados</span>
                 <span class="i2c-board-name" id="hw-i2c-board-name">Arduino Mega 2560</span>
               </div>
               <div class="i2c-pins-grid">
@@ -1114,28 +1114,28 @@
           </div>
 
           <div class="menu-panel-card">
-            <div class="menu-card-title">Opción 2: Conexión WiFi (ESP8266 / ESP32)</div>
+            <div class="menu-card-title" data-i18n="hw_opt2_title">Opción 2: Conexión WiFi (ESP8266 / ESP32)</div>
             <div class="menu-form-row">
-              <label>Dirección IP de la placa:</label>
+              <label data-i18n="hw_ip_label">Dirección IP de la placa:</label>
               <input type="text" id="hw-wifi-ip" value="192.168.1.100" />
             </div>
-            <button class="btn-secondary btn-full" id="btn-hw-connect-wifi">Conectar por WiFi</button>
+            <button class="btn-secondary btn-full" id="btn-hw-connect-wifi" data-i18n="btn_hw_connect_wifi">Conectar por WiFi</button>
           </div>
 
           <div class="menu-panel-card">
             <label class="checkbox-label" style="font-size: 11px; font-weight: 600;">
-              <input type="checkbox" id="hw-auto-sync-check" /> Sincronizar en tiempo real al editar/animar
+              <input type="checkbox" id="hw-auto-sync-check" /> <span data-i18n="hw_auto_sync_label">Sincronizar en tiempo real al editar/animar</span>
             </label>
-            <button class="btn-secondary btn-full" id="btn-hw-send-frame" style="margin-top: 6px;">Enviar Fotograma Actual</button>
+            <button class="btn-secondary btn-full" id="btn-hw-send-frame" style="margin-top: 6px;" data-i18n="btn_hw_send_frame">Enviar Fotograma Actual</button>
           </div>
         </div>
 
         <div class="hw-stream-right">
           <div class="menu-card-title-row">
-            <span class="menu-card-title">Sketch Receptor para Arduino / ESP32</span>
+            <span class="menu-card-title" data-i18n="hw_receiver_title">Sketch Receptor para Arduino / ESP32</span>
             <div style="display: flex; gap: 6px;">
-              <button class="btn-action-sm" id="btn-copy-receiver-sketch">Copiar Sketch</button>
-              <button class="btn-primary-sm btn-upload" id="btn-hw-upload-sketch" style="background: #10b981; color: #fff; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; box-shadow: 0 2px 6px rgba(16,185,129,0.4);">⚡ Subir a la Placa</button>
+              <button class="btn-action-sm" id="btn-copy-receiver-sketch" data-i18n="btn_copy_sketch">Copiar Sketch</button>
+              <button class="btn-primary-sm btn-upload" id="btn-hw-upload-sketch" style="background: #10b981; color: #fff; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; box-shadow: 0 2px 6px rgba(16,185,129,0.4);" data-i18n="btn_hw_upload_btn">⚡ Subir a la Placa</button>
             </div>
           </div>
           <pre class="hw-sketch-code" id="hw-receiver-sketch-code"><code>// Sketch Receptor para Transmisión en Vivo OLED Designer
@@ -1211,7 +1211,7 @@ void loop() {
 <div class="modal-overlay hidden" id="modal-help">
   <div class="modal modal-xlarge modal-help-dialog">
     <div class="modal-header">
-      <h2>📖 Manual de Ayuda y Documentación — OLED-Designer-Suite-Professional</h2>
+      <h2 data-i18n="help_modal_title">📖 Manual de Ayuda y Documentación — OLED-Designer-Suite-Professional</h2>
       <button class="modal-close" data-close="modal-help">×</button>
     </div>
     <div class="modal-body help-modal-body">
@@ -1225,10 +1225,10 @@ void loop() {
             <span class="help-badge badge-purple">Licencia MIT</span>
             <span class="help-badge badge-orange">SSD1306 | SH1106 | SSD1309 | SSD1331 | SSD1351</span>
           </div>
-          <p class="help-intro-text">
+          <p class="help-intro-text" data-i18n="help_intro_text">
             <strong>OLED-Designer-Suite-Professional</strong> es una aplicación de escritorio integral y de alto rendimiento para diseñar, animar, simular y generar código para pantallas OLED monocromáticas y a color utilizadas en sistemas embebidos (<strong>Arduino, ESP32, ESP8266, Raspberry Pi Pico, STM32</strong> y más).
           </p>
-          <p class="help-intro-sub">
+          <p class="help-intro-sub" data-i18n="help_intro_sub">
             Combina un editor de dibujo en tiempo real, un sistema de animación por fotogramas múltiples (Timeline con Onion Skin), un generador y simulador físico de menús interactivos, un importador de GIFs con Dithering Floyd-Steinberg, un generador de códigos QR 1-bit, un catálogo de widgets paramétricos, modo de pantalla dual (Dual Screen <code>0x3C</code>/<code>0x3D</code>) y streaming en vivo por USB Serial y WiFi directamente a la pantalla real.
           </p>
         </div>
@@ -1237,17 +1237,17 @@ void loop() {
 
         <!-- 📑 Tabla de Contenidos -->
         <div class="help-section">
-          <h2>📑 Tabla de Contenidos</h2>
+          <h2 data-i18n="help_toc_title">📑 Tabla de Contenidos</h2>
           <div class="help-toc-grid">
-            <a href="#help-sec-features" class="help-toc-link">1. Características Principales</a>
-            <a href="#help-sec-install" class="help-toc-link">2. Instalación y Requisitos</a>
-            <a href="#help-sec-quickstart" class="help-toc-link">3. Guía de Inicio Rápido</a>
-            <a href="#help-sec-modules" class="help-toc-link">4. Módulos del Sistema</a>
-            <a href="#help-sec-codegen" class="help-toc-link">5. Generación de Código Multi-Plataforma</a>
-            <a href="#help-sec-ai" class="help-toc-link">6. Inteligencia Artificial Integrada</a>
-            <a href="#help-sec-shortcuts" class="help-toc-link">7. Atajos de Teclado</a>
-            <a href="#help-sec-structure" class="help-toc-link">8. Estructura del Proyecto</a>
-            <a href="#help-sec-db" class="help-toc-link">9. Base de Datos y Persistencia Local</a>
+            <a href="#help-sec-features" class="help-toc-link" data-i18n="help_toc_1">1. Características Principales</a>
+            <a href="#help-sec-install" class="help-toc-link" data-i18n="help_toc_2">2. Instalación y Requisitos</a>
+            <a href="#help-sec-quickstart" class="help-toc-link" data-i18n="help_toc_3">3. Guía de Inicio Rápido</a>
+            <a href="#help-sec-modules" class="help-toc-link" data-i18n="help_toc_4">4. Módulos del Sistema</a>
+            <a href="#help-sec-codegen" class="help-toc-link" data-i18n="help_toc_5">5. Generación de Código Multi-Plataforma</a>
+            <a href="#help-sec-ai" class="help-toc-link" data-i18n="help_toc_6">6. Inteligencia Artificial Integrada</a>
+            <a href="#help-sec-shortcuts" class="help-toc-link" data-i18n="help_toc_7">7. Atajos de Teclado</a>
+            <a href="#help-sec-structure" class="help-toc-link" data-i18n="help_toc_8">8. Estructura del Proyecto</a>
+            <a href="#help-sec-db" class="help-toc-link" data-i18n="help_toc_9">9. Base de Datos y Persistencia Local</a>
           </div>
         </div>
 

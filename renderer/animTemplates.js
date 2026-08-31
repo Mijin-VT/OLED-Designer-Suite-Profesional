@@ -745,7 +745,7 @@
 
       const loadBtn = document.createElement('button');
       loadBtn.className = 'btn-primary btn-full';
-      loadBtn.textContent = 'Cargar en Timeline';
+      loadBtn.textContent = (window.I18N && window.I18N.t('btn_load_timeline')) || 'Cargar en Timeline';
       loadBtn.onclick = () => loadTemplateIntoTimeline(tpl);
       card.appendChild(loadBtn);
 
@@ -808,6 +808,13 @@
     closeModal('modal-anim-templates');
     showToast(`Plantilla "${tpl.name}" cargada en la línea de tiempo ✓`, 'success');
   }
+
+  window.addEventListener('appLanguageChanged', () => {
+    const modal = document.getElementById('modal-anim-templates');
+    if (modal && !modal.classList.contains('hidden')) {
+      renderAnimTemplatesGrid();
+    }
+  });
 
   if (typeof window !== 'undefined') {
     window.openAnimTemplatesModal = openAnimTemplatesModal;

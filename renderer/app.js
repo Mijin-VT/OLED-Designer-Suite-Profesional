@@ -150,6 +150,18 @@ async function init() {
   bindMenuEvents();
   bindWindowResize();
 
+  window.addEventListener('appLanguageChanged', () => {
+    renderCanvas();
+    if (typeof updateTransformHUD === 'function') updateTransformHUD();
+    const zoomLabel = (window.I18N && window.I18N.t('zoom_status_label')) || 'Zoom: ';
+    const zoomEl = document.getElementById('zoom-status');
+    if (zoomEl) zoomEl.textContent = `${zoomLabel}${State.zoom}×`;
+    const wModal = document.getElementById('modal-widgets');
+    if (wModal && !wModal.classList.contains('hidden') && typeof renderWidgetList === 'function') {
+      renderWidgetList();
+    }
+  });
+
   // Cargar datos desde DB
   await loadDriversFromDB();
   await loadResolutionsFromDB();
@@ -621,7 +633,8 @@ function renderCanvas() {
   }
 
   // Actualizar statusbar y métricas en toolbar
-  document.getElementById('pixel-count').textContent = `Píxeles ON: ${countONPixels()}`;
+  const onLabel = (window.I18N && window.I18N.t('pixel_count_label')) || 'Píxeles ON: ';
+  document.getElementById('pixel-count').textContent = `${onLabel}${countONPixels()}`;
   document.getElementById('canvas-size-display').textContent = `${State.width} × ${State.height}`;
   updateToolbarMetrics();
 
@@ -2342,7 +2355,8 @@ function changeZoom(delta) {
   const newIdx = Math.max(0, Math.min(zooms.length - 1, idx + delta));
   State.zoom = zooms[newIdx];
   document.getElementById('zoom-display').textContent = `${State.zoom}×`;
-  document.getElementById('zoom-status').textContent = `Zoom: ${State.zoom}×`;
+  const zoomLabel = (window.I18N && window.I18N.t('zoom_status_label')) || 'Zoom: ';
+  document.getElementById('zoom-status').textContent = `${zoomLabel}${State.zoom}×`;
   resizeCanvases();
   renderCanvas();
 }

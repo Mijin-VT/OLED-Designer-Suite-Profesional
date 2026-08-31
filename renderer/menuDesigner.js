@@ -564,6 +564,15 @@ draw_menu()
 print("Menú interactivo listo.")`;
 }
 
+// Escuchar cambios de idioma
+window.addEventListener('appLanguageChanged', () => {
+  const modal = document.getElementById('modal-menu-designer');
+  if (modal && !modal.classList.contains('hidden')) {
+    renderMenuSimulation();
+    updateMenuCodePreview();
+  }
+});
+
 // Exportar globalmente
 if (typeof window !== 'undefined') {
   window.openMenuDesigner = openMenuDesigner;

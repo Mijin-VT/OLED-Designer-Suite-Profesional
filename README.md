@@ -1,5 +1,9 @@
 # ⚡ OLED-Designer-Suite-Professional
 
+<p align="center">
+  <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED" width="75%">
+</p>
+
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Electron](https://img.shields.io/badge/Electron-Desktop-blue.svg)](https://www.electronjs.org/)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-purple.svg)](#-licencia)
@@ -87,17 +91,12 @@ INSTALL.bat
 ```
 *(Instala dependencias, configura el entorno y verifica los componentes necesarios).*
 
-##### Opción B — Inicio Rápido:
 Haz doble clic en:
 ```bat
 INICIAR.bat
 ```
-O para iniciar la aplicación sin ventana de terminal de fondo:
-```vbs
-INICIAR_OCULTO.vbs
-```
 
-##### Opción C — Desde Consola / Terminal:
+##### Opción B — Desde Consola / Terminal:
 ```powershell
 npm install
 npm start

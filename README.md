@@ -75,8 +75,8 @@ Combina un editor de dibujo en tiempo real, un sistema de animación por fotogra
 
 ### 1. Clonar el Repositorio (con Git LFS):
 ```bash
-git clone https://github.com/Mijin-VT/OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED.git
-cd OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED
+git clone https://github.com/Mijin-VT/OLED-Designer-Suite-Profesional.git
+cd OLED-Designer-Suite-Profesional
 git lfs pull
 ```
 

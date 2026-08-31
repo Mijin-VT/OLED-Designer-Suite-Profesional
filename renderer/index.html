@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+  <title>OLED Designer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     TITLEBAR (Custom — reemplaza el nativo en Windows/Linux)
+     ============================================================ -->
+<div class="titlebar" id="titlebar">
+  <div class="titlebar-drag">
+    <span class="titlebar-icon">⬛</span>
+    <span class="titlebar-title">OLED Designer</span>
+  </div>
+  <div class="titlebar-status">
+    <span id="db-status-indicator" class="status-dot status-unknown" title="Estado DB"></span>
+    <span id="project-name-display">Sin título</span>
+    <span id="unsaved-indicator" class="unsaved hidden">●</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOOLBAR PRINCIPAL
+     ============================================================ -->
+<div class="toolbar" id="toolbar">
+  <!-- Fila 1 Col 1: Archivo -->
+  <div class="toolbar-group toolbar-group-file">
+    <button class="btn-toolbar" id="btn-new" title="Nuevo Proyecto (Ctrl+N)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Nuevo
+    </button>
+    <button class="btn-toolbar" id="btn-open" title="Abrir Proyecto (Ctrl+O)">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Abrir
+    </button>
+    <button class="btn-toolbar" id="btn-save" title="Guardar (Ctrl+S)">
+      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+      Guardar
+    </button>
+  </div>
+
+  <!-- Fila 1 Col 2: Acciones y Módulos -->
+  <div class="toolbar-group toolbar-group-features">
+    <button class="btn-toolbar btn-primary btn-export" id="btn-export" title="Exportar Código (Ctrl+E)">
+      <svg viewBox="0 0 24 24"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>
+      Exportar Código
+    </button>
+    <button class="btn-toolbar btn-ai" id="btn-ai-gen" title="Generar con IA (Ctrl+I)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      IA
+    </button>
+    <button class="btn-toolbar btn-widgets" id="btn-open-widgets" title="Biblioteca de Widgets e Iconos (W)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><circle cx="6.5" cy="17.5" r="3.5"/></svg>
+      Widgets
+    </button>
+    <button class="btn-toolbar btn-anim" id="btn-toggle-timeline" title="Línea de Tiempo de Animación (Shift+A)">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/><line x1="19" y1="5" x2="19" y2="19" stroke-width="2"/></svg>
+      Animación
+    </button>
+    <button class="btn-toolbar btn-menu" id="btn-open-menu-designer" title="Generador y Simulador de Menús (M)">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Menús
+    </button>
+    <button class="btn-toolbar btn-gif" id="btn-open-gif-import" title="Importar GIF o Video con Dithering Floyd-Steinberg">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      GIF/Video
+    </button>
+    <button class="btn-toolbar btn-qr" id="btn-open-qr" title="Generador de Códigos QR 1-Bit">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
+      QR
+    </button>
+    <button class="btn-toolbar btn-templates" id="btn-open-anim-templates" title="Plantillas de Animaciones (Ojos, Loaders, ECG)">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Plantillas
+    </button>
+    <button class="btn-toolbar btn-dual" id="btn-toggle-dual-screen" title="Modo Doble Pantalla (Dual OLED 0x3C / 0x3D)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="9" height="14" rx="1.5"/><rect x="13" y="5" width="9" height="14" rx="1.5"/></svg>
+      Dual OLED
+    </button>
+    <button class="btn-toolbar btn-pencil toggle-btn active" id="tb-pencil" title="Lápiz (P)">
+      <svg viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+      Lápiz
+    </button>
+  </div>
+
+  <!-- Fila 2 Col 1: Espacio que alinea exactamente debajo de Archivo -->
+  <div class="toolbar-spacer"></div>
+
+  <!-- Fila 2 Col 2: Hardware, Herramientas, Zoom y Vistas -->
+  <div class="toolbar-group toolbar-group-tools">
+    <button class="btn-toolbar btn-live-hw" id="btn-open-live-hardware" title="Transmisión en Vivo a Pantalla Real (USB/WiFi)">
+      <span class="hw-stream-dot-sm" id="tb-hw-indicator"></span>
+      <svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      Hardware
+    </button>
+
+    <button class="btn-toolbar toggle-btn" id="tb-eraser" title="Borrador / Goma (E)">
+      <svg viewBox="0 0 24 24"><path d="M18 13l-5 5L3 8l5-5 10 10z" stroke-width="2"/><line x1="14" y1="17" x2="21" y2="17" stroke-width="2"/></svg>
+      Borrador
+    </button>
+    <button class="btn-toolbar" id="tb-clear" title="Borrar todo el canvas (Ctrl+Del)">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Borrar Todo
+    </button>
+
+    <div class="toolbar-subgroup toolbar-undo-group">
+      <button class="btn-toolbar" id="btn-undo" title="Deshacer (Ctrl+Z)" disabled>
+        <svg viewBox="0 0 24 24"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>
+      </button>
+      <button class="btn-toolbar" id="btn-redo" title="Rehacer (Ctrl+Y)" disabled>
+        <svg viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-.49-3.14"/></svg>
+      </button>
+    </div>
+
+    <div class="toolbar-subgroup toolbar-zoom-group">
+      <button class="btn-toolbar btn-small" id="btn-zoom-out" title="Alejar">−</button>
+      <span class="zoom-display" id="zoom-display">4×</span>
+      <button class="btn-toolbar btn-small" id="btn-zoom-in" title="Acercar">+</button>
+      <button class="btn-toolbar btn-small" id="btn-zoom-fit" title="Ajustar">⊡</button>
+    </div>
+
+    <button class="btn-toolbar btn-hardware" id="btn-hw-preview" title="Vista previa en hardware real (Simulación)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2" stroke-width="2"/><line x1="6" y1="20" x2="6" y2="18"/><line x1="10" y1="20" x2="10" y2="18"/><line x1="14" y1="20" x2="14" y2="18"/><line x1="18" y1="20" x2="18" y2="18"/></svg>
+      Vista Hardware
+    </button>
+    <button class="btn-toolbar" id="btn-export-png1bit" title="Exportar canvas como PNG 1-bit monocromo">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      PNG 1-bit
+    </button>
+    <button class="btn-toolbar toggle-btn" id="btn-grid" title="Cuadrícula (Ctrl+G)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Grid
+    </button>
+    <button class="btn-toolbar toggle-btn btn-preview active" id="btn-preview" title="Vista Previa (Ctrl+P)">
+      <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Preview
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     LAYOUT PRINCIPAL — Tres Paneles
+     ============================================================ -->
+<div class="app-layout" id="app-layout">
+
+  <!-- ========== PANEL IZQUIERDO — Herramientas ========== -->
+  <aside class="panel panel-left" id="panel-left">
+    <div class="panel-section">
+      <div class="panel-section-title">Herramientas</div>
+      <div class="tools-grid">
+        <button class="tool-btn active" data-tool="pencil" title="Lápiz (P)">
+          <svg viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          <span>Lápiz</span>
+        </button>
+        <button class="tool-btn" data-tool="eraser" title="Borrador (E)">
+          <svg viewBox="0 0 24 24"><polyline points="20,20 2,20"/><path d="M6.5 15L3 21h13l-9.5-6z"/><rect x="9" y="3" width="12" height="12" rx="2" transform="rotate(45 15 9)"/></svg>
+          <span>Borrador</span>
+        </button>
+        <button class="tool-btn" data-tool="line" title="Línea (L)">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5" stroke-width="2"/></svg>
+          <span>Línea</span>
+        </button>
+        <button class="tool-btn" data-tool="rect" title="Rectángulo (R)">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+          <span>Rect</span>
+        </button>
+        <button class="tool-btn" data-tool="filled-rect" title="Rect. Relleno (Shift+R)">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="currentColor"/></svg>
+          <span>Rect●</span>
+        </button>
+        <button class="tool-btn" data-tool="circle" title="Círculo (C)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          <span>Círculo</span>
+        </button>
+        <button class="tool-btn" data-tool="filled-circle" title="Círculo Relleno (Shift+C)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>
+          <span>Circ●</span>
+        </button>
+        <button class="tool-btn" data-tool="fill" title="Relleno / Bote (F)">
+          <svg viewBox="0 0 24 24"><path d="M19 11l-7-7-8.5 8.5a5.5 5.5 0 0 0 7.78 7.78L19 11z"/><path d="M20 9l1 1-1 1-1-1 1-1z"/><path d="M22 17c0 1.1-.9 2-2 2s-2-.9-2-2c0-.5.4-1.2 1-2.1l1-1.4 1 1.4c.6.9 1 1.6 1 2.1z"/></svg>
+          <span>Relleno</span>
+        </button>
+        <button class="tool-btn" data-tool="text" title="Texto (T)">
+          <svg viewBox="0 0 24 24"><polyline points="4,7 4,4 20,4 20,7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <span>Texto</span>
+        </button>
+        <button class="tool-btn" data-tool="select" title="Selección (S)">
+          <svg viewBox="0 0 24 24"><path d="M5 3l14 9-7 2-4 7z"/></svg>
+          <span>Selec.</span>
+        </button>
+        <button class="tool-btn" data-tool="image" title="Importar Imagen (I)" id="btn-import-img">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+          <span>Imagen</span>
+        </button>
+        <button class="tool-btn" data-tool="eyedropper" title="Cuentagotas (D)">
+          <svg viewBox="0 0 24 24"><path d="M3 21l8.5-8.5M9 3l6 6-1 3-3 1-6-6z"/><path d="M19 9l-1.5-1.5-1.5 1.5 1.5 1.5 1.5-1.5z"/></svg>
+          <span>Cuentag.</span>
+        </button>
+        <button class="tool-btn" data-tool="widget" id="btn-tool-widget" title="Biblioteca de Widgets e Iconos (W)">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><circle cx="6.5" cy="17.5" r="3.5"/></svg>
+          <span>Widgets</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Opciones de herramienta activa -->
+    <div class="panel-section" id="tool-options">
+      <div class="panel-section-title">Opciones</div>
+
+      <!-- Opciones de Lápiz -->
+      <div class="tool-option-group" id="opt-brush">
+        <label id="brush-size-label">Tamaño del Lápiz</label>
+        <div class="size-buttons">
+          <button class="size-btn active" data-size="1">1px</button>
+          <button class="size-btn" data-size="2">2px</button>
+          <button class="size-btn" data-size="3">3px</button>
+          <button class="size-btn" data-size="4">4px</button>
+        </div>
+      </div>
+
+      <!-- Opciones de Borrador -->
+      <div class="tool-option-group hidden" id="opt-eraser">
+        <label>Grosor del Borrador</label>
+        <div class="size-buttons">
+          <button class="size-btn active" data-esize="1">1px</button>
+          <button class="size-btn" data-esize="2">2px</button>
+          <button class="size-btn" data-esize="4">4px</button>
+          <button class="size-btn" data-esize="8">8px</button>
+          <button class="size-btn" data-esize="12">12px</button>
+        </div>
+        <p class="tool-tip">Consejo: Clic derecho siempre borra.</p>
+      </div>
+
+      <!-- Opciones de Texto -->
+      <div class="tool-option-group hidden" id="opt-text">
+        <label>Contenido</label>
+        <input type="text" id="text-content" placeholder="Escribe aquí..." maxlength="60" value="Hola OLED" />
+
+        <label>Alineación</label>
+        <div class="align-buttons">
+          <button class="align-btn active" data-talign="left" title="Alinear a la izquierda">⯇ Izq</button>
+          <button class="align-btn" data-talign="center" title="Centrado">⯈|⯇ Centro</button>
+          <button class="align-btn" data-talign="right" title="Alinear a la derecha">Der ⯈</button>
+        </div>
+
+        <label>Tamaño</label>
+        <div class="size-buttons">
+          <button class="size-btn active" data-tsize="1">1×</button>
+          <button class="size-btn" data-tsize="2">2×</button>
+          <button class="size-btn" data-tsize="3">3×</button>
+          <button class="size-btn" data-tsize="4">4×</button>
+        </div>
+
+        <div class="text-actions-row">
+          <button class="btn-action-sm" id="btn-add-text-layer" title="Crear nueva capa de texto editable">+ Capa de Texto</button>
+          <button class="btn-action-sm" id="btn-rasterize-text" title="Fundir texto en el bitmap de píxeles">Fijar al Canvas</button>
+          <button class="btn-action-sm danger" id="btn-delete-text-layer" title="Eliminar capa de texto seleccionada">Eliminar</button>
+        </div>
+
+        <p class="tool-tip">💡 <strong>Doble clic</strong> en el canvas sobre el texto para editarlo o arrastrarlo.</p>
+        <label style="margin-top:6px;">Vista Previa</label>
+        <canvas id="text-preview-canvas" width="120" height="30"></canvas>
+      </div>
+
+      <!-- Color de píxel -->
+      <div class="tool-option-group" id="opt-color">
+        <label>Píxel</label>
+        <div class="color-toggle">
+          <button class="color-btn active" data-color="1" title="Píxel ON (Encendido / Blanco)">
+            <span style="width:9px;height:9px;background:#ffffff;border:1px solid #94a3b8;border-radius:2px;display:inline-block;"></span>
+            ON
+          </button>
+          <button class="color-btn" data-color="0" title="Píxel OFF (Apagado / Borrar)">
+            <span style="width:9px;height:9px;background:#151828;border:1px solid #64748b;border-radius:2px;display:inline-block;"></span>
+            OFF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones del canvas -->
+    <div class="panel-section">
+      <div class="panel-section-title">Canvas</div>
+      <button class="btn-action" id="btn-clear">Limpiar Todo</button>
+      <button class="btn-action" id="btn-invert">Invertir</button>
+      <button class="btn-action" id="btn-flip-h">Voltear H</button>
+      <button class="btn-action" id="btn-flip-v">Voltear V</button>
+      <button class="btn-action" id="btn-shift-up">↑ Mover</button>
+      <button class="btn-action" id="btn-shift-down">↓ Mover</button>
+      <button class="btn-action" id="btn-shift-left">← Mover</button>
+      <button class="btn-action" id="btn-shift-right">→ Mover</button>
+    </div>
+
+    <!-- Apartado de Ayuda (Ubicación solicitada en círculo rojo) -->
+    <div class="panel-section panel-section-help-sidebar">
+      <div class="panel-section-title">Ayuda</div>
+      <button class="btn-help-sidebar-card" id="btn-sidebar-help" title="Manual de Ayuda y Documentación Completa (F1)">
+        <div class="help-sidebar-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" fill="none" stroke-width="2"/>
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div class="help-sidebar-text">
+          <span class="help-sidebar-title">Manual de Ayuda</span>
+          <span class="help-sidebar-sub">Guía & Atajos (F1)</span>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== ÁREA CENTRAL — Canvas ========== -->
+  <main class="canvas-area" id="canvas-area">
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <!-- Canvas principal de edición -->
+      <canvas id="main-canvas"></canvas>
+      <!-- Canvas de overlay (cursor, selección, guías) -->
+      <canvas id="overlay-canvas"></canvas>
+
+      <!-- Barra de control flotante de Transformación (Estirar / Encoger figuras y widgets) -->
+      <div class="transform-hud hidden" id="transform-hud">
+        <span class="transform-dim" id="transform-dim">0 × 0 px</span>
+        <button class="hud-btn hud-btn-ratio" id="btn-transform-ratio" title="Bloquear / Desbloquear proporción">🔗</button>
+        <button class="hud-btn hud-btn-apply" id="btn-transform-apply" title="Fijar figura al canvas (Enter)">✔ Aplicar</button>
+        <button class="hud-btn hud-btn-delete" id="btn-transform-delete" title="Eliminar figura del espacio de trabajo (Supr)">🗑</button>
+        <button class="hud-btn hud-btn-cancel" id="btn-transform-cancel" title="Cancelar cambios (Esc)">✖</button>
+      </div>
+    </div>
+
+    <!-- Coordenadas y estado -->
+    <div class="canvas-statusbar">
+      <span id="cursor-pos">X: — Y: —</span>
+      <span id="canvas-size-display">128 × 64</span>
+      <span id="pixel-count">Píxeles ON: 0</span>
+      <span id="zoom-status">Zoom: 4×</span>
+    </div>
+
+    <!-- Barra de Animación / Línea de Tiempo (Timeline) -->
+    <div class="timeline-container hidden" id="timeline-container">
+      <div class="timeline-toolbar">
+        <div class="timeline-group">
+          <button class="tl-btn" id="tl-btn-first" title="Primer fotograma (Home)">⏮</button>
+          <button class="tl-btn" id="tl-btn-prev" title="Fotograma anterior (←)">◀</button>
+          <button class="tl-btn tl-btn-play" id="tl-btn-play" title="Reproducir / Pausar (Espacio)">▶</button>
+          <button class="tl-btn" id="tl-btn-next" title="Fotograma siguiente (→)">▶</button>
+          <button class="tl-btn" id="tl-btn-last" title="Último fotograma (End)">⏭</button>
+        </div>
+
+        <div class="timeline-separator"></div>
+
+        <div class="timeline-group">
+          <label>FPS:</label>
+          <select id="tl-fps-select">
+            <option value="1">1 FPS</option>
+            <option value="2">2 FPS</option>
+            <option value="5">5 FPS</option>
+            <option value="10" selected>10 FPS</option>
+            <option value="15">15 FPS</option>
+            <option value="20">20 FPS</option>
+            <option value="24">24 FPS</option>
+          </select>
+          <span class="tl-badge" id="tl-frame-badge">Frame 1 / 1</span>
+        </div>
+
+        <div class="timeline-separator"></div>
+
+        <div class="timeline-group">
+          <button class="tl-toggle-btn" id="tl-btn-onion" title="Papel Cebolla: Muestra el fotograma anterior con tenue resplandor naranja">
+            🧅 Cebolla
+          </button>
+          <button class="tl-toggle-btn active" id="tl-btn-loop" title="Bucle continuo de animación">
+            🔁 Bucle
+          </button>
+        </div>
+
+        <div class="timeline-separator"></div>
+
+        <div class="timeline-group">
+          <button class="tl-action-btn" id="tl-btn-add" title="Agregar fotograma nuevo en blanco">+ Frame</button>
+          <button class="tl-action-btn" id="tl-btn-dup" title="Duplicar fotograma actual para continuar el movimiento">⧉ Duplicar</button>
+          <button class="tl-action-btn tl-btn-danger" id="tl-btn-del" title="Eliminar fotograma actual">🗑 Borrar</button>
+        </div>
+
+        <div class="timeline-group timeline-right">
+          <button class="tl-action-btn tl-btn-accent" id="tl-btn-export-anim" title="Generar código animado para Arduino / U8g2 / MicroPython">
+            🎬 Exportar Animación
+          </button>
+          <button class="tl-btn-close" id="tl-btn-close" title="Ocultar línea de tiempo">×</button>
+        </div>
+      </div>
+
+      <!-- Tira de fotogramas (Filmstrip) -->
+      <div class="timeline-filmstrip" id="timeline-filmstrip">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- Panel de vista previa (mini) -->
+    <div class="preview-panel" id="preview-panel">
+      <div class="preview-panel-header">
+        <span>Vista Previa</span>
+        <button id="btn-close-preview" title="Cerrar">×</button>
+      </div>
+      <div class="preview-display" id="preview-display">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+      <div class="preview-controls">
+        <select id="preview-color-override">
+          <option value="">Color del panel →</option>
+          <option value="white">Blanco</option>
+          <option value="blue">Azul</option>
+          <option value="yellow">Amarillo</option>
+          <option value="rgb">RGB</option>
+          <option value="green">Verde</option>
+        </select>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== PANEL DERECHO — Configuración ========== -->
+  <aside class="panel panel-right" id="panel-right">
+
+    <!-- Configuración de resolución -->
+    <div class="panel-section">
+      <div class="panel-section-title">Resolución</div>
+      <select id="resolution-select" class="select-full">
+        <option value="128x64">128×64 (Estándar)</option>
+        <option value="128x32">128×32 (Mini)</option>
+        <option value="96x16">96×16 (Ultra-mini)</option>
+        <option value="128x128">128×128 (Cuadrado)</option>
+        <option value="96x64">96×64 (Color mini)</option>
+        <option value="64x48">64×48 (Mini color)</option>
+        <option value="256x64">256×64 (Panorámico)</option>
+        <option value="custom">Personalizado...</option>
+      </select>
+      <div class="custom-res hidden" id="custom-res-group">
+        <div class="input-row">
+          <input type="number" id="custom-width" placeholder="Ancho" min="8" max="256" value="128" />
+          <span>×</span>
+          <input type="number" id="custom-height" placeholder="Alto" min="8" max="256" value="64" />
+        </div>
+        <button class="btn-action" id="btn-apply-res">Aplicar</button>
+      </div>
+    </div>
+
+    <!-- Controlador (Driver) -->
+    <div class="panel-section">
+      <div class="panel-section-title">Controlador (Driver)</div>
+      <select id="driver-select" class="select-full">
+        <option value="SSD1306">SSD1306 (más popular)</option>
+        <option value="SH1106">SH1106</option>
+        <option value="SSD1309">SSD1309</option>
+        <option value="SSD1331">SSD1331 (Color)</option>
+        <option value="SSD1351">SSD1351 (Color 128×128)</option>
+        <option value="SH1107">SH1107</option>
+        <option value="SSD1322">SSD1322</option>
+        <option value="SSD1327">SSD1327 (Grises)</option>
+        <option value="ILI9341">ILI9341 (TFT)</option>
+      </select>
+      <div class="driver-info" id="driver-info">
+        <span class="info-tag" id="driver-voltage">3.3V / 5V</span>
+        <span class="info-tag" id="driver-color-support">Monocromo</span>
+      </div>
+    </div>
+
+    <!-- Interfaz -->
+    <div class="panel-section">
+      <div class="panel-section-title">Interfaz</div>
+      <div class="interface-toggle">
+        <button class="iface-btn active" data-iface="I2C">I2C</button>
+        <button class="iface-btn" data-iface="SPI">SPI</button>
+      </div>
+      <!-- Dirección I2C -->
+      <div class="iface-detail" id="i2c-detail">
+        <label>Dirección I2C</label>
+        <select id="i2c-addr-select">
+          <option value="0x3C">0x3C (predeterminado)</option>
+          <option value="0x3D">0x3D (alt)</option>
+        </select>
+      </div>
+      <!-- CS Pin SPI -->
+      <div class="iface-detail hidden" id="spi-detail">
+        <label>Pin CS (Chip Select)</label>
+        <select id="spi-cs-select">
+          <option value="10">D10 (SS predeterminado)</option>
+          <option value="9">D9</option>
+          <option value="5">D5 (ESP32)</option>
+          <option value="15">D15 (ESP32)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Color de visualización -->
+    <div class="panel-section">
+      <div class="panel-section-title">Color de Display</div>
+      <div class="color-palette">
+        <button class="display-color-btn active" data-dcolor="white" title="Blanco">
+          <div class="color-swatch" style="background:#ffffff;"></div>
+          <span>Blanco</span>
+        </button>
+        <button class="display-color-btn" data-dcolor="blue" title="Azul">
+          <div class="color-swatch" style="background:#4488ff;"></div>
+          <span>Azul</span>
+        </button>
+        <button class="display-color-btn" data-dcolor="yellow" title="Amarillo">
+          <div class="color-swatch" style="background:#ffdd00;"></div>
+          <span>Amarillo</span>
+        </button>
+        <button class="display-color-btn" data-dcolor="green" title="Verde">
+          <div class="color-swatch" style="background:#00ff44;"></div>
+          <span>Verde</span>
+        </button>
+        <button class="display-color-btn" data-dcolor="rgb" title="RGB (Color)">
+          <div class="color-swatch" style="background: linear-gradient(135deg,#f00,#0f0,#00f);"></div>
+          <span>RGB</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pinout -->
+    <div class="panel-section">
+      <div class="panel-section-title">Pinout
+        <button class="btn-mini" id="btn-reload-pinout" title="Recargar desde DB">↺</button>
+      </div>
+      <div class="pinout-table" id="pinout-table">
+        <!-- Generado dinámicamente por JS -->
+        <div class="pinout-loading">Selecciona un driver e interfaz</div>
+      </div>
+    </div>
+
+    <!-- Información del proyecto -->
+    <div class="panel-section">
+      <div class="panel-section-title">Proyecto</div>
+      <input type="text" id="project-name-input" placeholder="Nombre del proyecto" class="input-full" value="Sin título" />
+      <textarea id="project-desc-input" placeholder="Descripción (opcional)" class="textarea-full" rows="2"></textarea>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============================================================
+     MODALES
+     ============================================================ -->
+
+<!-- Modal: Exportar Código -->
+<div class="modal-overlay hidden" id="modal-export">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>Exportar Código</h2>
+      <button class="modal-close" data-close="modal-export">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="export-platforms">
+        <button class="platform-btn active" data-platform="arduino_adafruit">Arduino / Adafruit GFX</button>
+        <button class="platform-btn" data-platform="u8g2">U8g2</button>
+        <button class="platform-btn" data-platform="c_array">C Array (Bitmap)</button>
+        <button class="platform-btn" data-platform="micropython">MicroPython</button>
+        <button class="platform-btn" data-platform="circuitpython">CircuitPython</button>
+        <button class="platform-btn" data-platform="javascript">JavaScript / TS</button>
+        <button class="platform-btn" data-platform="rust">Rust</button>
+      </div>
+      <div class="export-options">
+        <label><input type="checkbox" id="export-include-init" checked /> Incluir inicialización</label>
+        <label><input type="checkbox" id="export-include-comments" checked /> Incluir comentarios</label>
+        <label><input type="checkbox" id="export-ai-mode" /> Asistencia IA</label>
+      </div>
+      <div class="code-output-area">
+        <div class="code-toolbar">
+          <span id="export-platform-label">Arduino + Adafruit GFX</span>
+          <div class="code-actions">
+            <button id="btn-generate-code" class="btn-primary-sm">Generar ↻</button>
+            <button id="btn-copy-code" class="btn-sm">Copiar</button>
+            <button id="btn-save-code" class="btn-sm">Guardar .ino</button>
+          </div>
+        </div>
+        <pre id="code-output"><code id="code-content">// Haz clic en "Generar" para crear el código...</code></pre>
+
+        <!-- Panel de Carga Directa a Arduino -->
+        <div class="arduino-upload-panel" id="arduino-upload-panel">
+          <div class="arduino-upload-header">
+            <span class="arduino-badge">⚡ Subir a Placa Arduino</span>
+            <span class="arduino-status-badge" id="arduino-detected-label">Buscando placas...</span>
+          </div>
+          <div class="arduino-upload-controls">
+            <div class="arduino-control-item" style="flex: 1.2;">
+              <label>Puerto COM Arduino:</label>
+              <div class="port-select-wrapper">
+                <select id="arduino-port-select" class="form-select">
+                  <option value="">Detectando puertos...</option>
+                </select>
+                <button id="btn-refresh-arduino-ports" class="btn-icon" title="Volver a escanear puertos COM">↻</button>
+              </div>
+            </div>
+            <div class="arduino-control-item">
+              <label>Modelo de Placa:</label>
+              <select id="arduino-board-select" class="form-select">
+                <option value="arduino:avr:mega">Arduino Mega or Mega 2560 (ATmega2560)</option>
+                <option value="arduino:avr:uno">Arduino Uno (ATmega328P)</option>
+                <option value="arduino:avr:nano">Arduino Nano (ATmega328P)</option>
+                <option value="esp32:esp32:esp32">ESP32 Dev Module</option>
+              </select>
+            </div>
+            <div class="arduino-control-buttons">
+              <button id="btn-upload-arduino" class="btn-primary-sm btn-upload">⚡ Subir a Placa</button>
+              <button id="btn-open-arduino-ide" class="btn-sm" title="Abrir sketch .ino en Arduino IDE">Abrir en Arduino IDE</button>
+            </div>
+          </div>
+          <div class="i2c-detected-card" id="export-i2c-card" style="margin-top: 8px;">
+            <div class="i2c-card-header">
+              <span class="i2c-tag">🔌 Pines I2C Identificados</span>
+              <span class="i2c-board-name" id="export-i2c-board-name">Arduino Mega 2560</span>
+            </div>
+            <div class="i2c-pins-grid">
+              <div class="i2c-pin-item sda">
+                <span class="pin-role">SDA (Datos)</span>
+                <span class="pin-val" id="export-i2c-pin-sda">Pin 20</span>
+              </div>
+              <div class="i2c-pin-item scl">
+                <span class="pin-role">SCL (Reloj)</span>
+                <span class="pin-val" id="export-i2c-pin-scl">Pin 21</span>
+              </div>
+              <div class="i2c-pin-item vcc">
+                <span class="pin-role">VCC</span>
+                <span class="pin-val" id="export-i2c-pin-vcc">5V</span>
+              </div>
+              <div class="i2c-pin-item gnd">
+                <span class="pin-role">GND</span>
+                <span class="pin-val" id="export-i2c-pin-gnd">GND</span>
+              </div>
+            </div>
+            <div class="i2c-pin-note" id="export-i2c-pin-note">
+              ⚡ <strong>Arduino MEGA:</strong> SDA = <strong>Pin 20</strong> | SCL = <strong>Pin 21</strong> (¡NO usar A4/A5!).
+            </div>
+          </div>
+          <div id="arduino-upload-log" class="arduino-log hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Abrir Proyecto -->
+<div class="modal-overlay hidden" id="modal-open">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Abrir Proyecto</h2>
+      <button class="modal-close" data-close="modal-open">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="open-tabs">
+        <button class="tab-btn active" data-tab="db">Base de Datos</button>
+        <button class="tab-btn" data-tab="file">Archivo</button>
+      </div>
+      <div class="tab-content" id="tab-db">
+        <div class="project-list" id="project-list">
+          <div class="loading-spinner">Cargando proyectos...</div>
+        </div>
+      </div>
+      <div class="tab-content hidden" id="tab-file">
+        <button class="btn-action" id="btn-browse-file">Explorar archivo (.oled / .json)...</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Historial de Versiones -->
+<div class="modal-overlay hidden" id="modal-versions">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Historial de Versiones</h2>
+      <button class="modal-close" data-close="modal-versions">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="version-list" id="version-list">
+        <div class="loading-spinner">Cargando...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Vista Previa en Hardware (Simulación Física) -->
+<div class="modal-overlay hidden" id="modal-hardware">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>📟 Simulación de Pantalla en Hardware Físico</h2>
+      <button class="modal-close" data-close="modal-hardware">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="hw-controls-bar">
+        <div class="hw-control-group">
+          <label>Color OLED:</label>
+          <div class="hw-color-pills">
+            <button class="hw-pill active" data-hwcolor="white">⚪ Blanco</button>
+            <button class="hw-pill" data-hwcolor="blue">🔵 Azul</button>
+            <button class="hw-pill" data-hwcolor="yellow">🟡 Amarillo</button>
+            <button class="hw-pill" data-hwcolor="yellow_blue">🟡/🔵 Amarillo + Azul</button>
+            <button class="hw-pill" data-hwcolor="green">🟢 Verde</button>
+            <button class="hw-pill" data-hwcolor="rgb">🌈 RGB</button>
+          </div>
+        </div>
+        <div class="hw-control-group">
+          <label>Módulo PCB:</label>
+          <select id="hw-pcb-style">
+            <option value="blue">PCB Azul (Clásico I2C)</option>
+            <option value="black">PCB Negro Mate</option>
+            <option value="purple">PCB Púrpura</option>
+          </select>
+        </div>
+        <div class="hw-control-actions">
+          <button class="btn-sm" id="btn-copy-hw-photo">Copiar Imagen</button>
+          <button class="btn-primary-sm" id="btn-download-hw-photo">Descargar Foto</button>
+        </div>
+      </div>
+
+      <!-- Simulador de Módulo Físico -->
+      <div class="hw-workbench">
+        <div class="oled-physical-module pcb-blue" id="oled-physical-module">
+          <!-- Pines de cabecera -->
+          <div class="oled-pcb-pins" id="oled-pcb-pins">
+            <div class="pcb-pin" title="GND"><span class="pin-gold"></span><label>GND</label></div>
+            <div class="pcb-pin" title="VCC"><span class="pin-gold"></span><label>VCC</label></div>
+            <div class="pcb-pin" title="SCL"><span class="pin-gold"></span><label>SCL</label></div>
+            <div class="pcb-pin" title="SDA"><span class="pin-gold"></span><label>SDA</label></div>
+          </div>
+
+          <!-- Componentes SMD decorativos en PCB -->
+          <div class="pcb-trace trace-left"></div>
+          <div class="pcb-trace trace-right"></div>
+          <div class="smd-chip" title="Regulador LDO 3.3V">662K</div>
+          <div class="smd-resistor" style="top:12px; left:25px;"></div>
+          <div class="smd-resistor" style="top:22px; left:25px;"></div>
+
+          <!-- Pantalla de cristal OLED -->
+          <div class="oled-glass-screen" id="oled-glass-screen">
+            <div class="oled-glass-reflection"></div>
+            <canvas id="hardware-canvas"></canvas>
+            <div class="oled-pixel-scanlines"></div>
+          </div>
+
+          <!-- Tornillos y texto serigrafía -->
+          <div class="pcb-hole hole-tl"></div>
+          <div class="pcb-hole hole-tr"></div>
+          <div class="pcb-hole hole-bl"></div>
+          <div class="pcb-hole hole-br"></div>
+          <div class="pcb-silk" id="hw-pcb-label">0.96" OLED 128x64 SSD1306</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Biblioteca de Widgets e Iconos -->
+<div class="modal-overlay hidden" id="modal-widgets">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>🧩 Biblioteca de Widgets e Iconos Monocromo</h2>
+      <button class="modal-close" data-close="modal-widgets">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Barra superior del modal: Buscador y Categorías -->
+      <div class="widget-search-bar">
+        <input type="text" id="widget-search-input" placeholder="Buscar icono o widget (ej: wifi, batería, reloj, barra, dial)..." />
+        <div class="widget-cat-tabs">
+          <button class="wcat-btn active" data-cat="all">Todos</button>
+          <button class="wcat-btn" data-cat="parametric">⚡ Widgets Pro</button>
+          <button class="wcat-btn" data-cat="hardware">Hardware & Bat</button>
+          <button class="wcat-btn" data-cat="sensores">Sensores</button>
+          <button class="wcat-btn" data-cat="sistema">Sistema</button>
+          <button class="wcat-btn" data-cat="navegacion">Navegación</button>
+        </div>
+      </div>
+
+      <!-- Área principal: Galería a la izquierda, Configuración/Preview a la derecha -->
+      <div class="widget-browser-layout">
+        <!-- Galería de items -->
+        <div class="widget-items-grid" id="widget-items-grid">
+          <!-- Generado dinámicamente -->
+        </div>
+
+        <!-- Panel lateral del widget seleccionado -->
+        <div class="widget-preview-panel">
+          <div class="wpreview-title" id="wpreview-title">Selecciona un elemento</div>
+          <div class="wpreview-box">
+            <canvas id="widget-preview-canvas" width="128" height="64"></canvas>
+          </div>
+          <div class="wpreview-meta" id="wpreview-dims">—</div>
+
+          <!-- Controles de parámetros para widgets editables -->
+          <div class="widget-param-controls hidden" id="widget-param-controls">
+            <div class="param-row">
+              <label>Valor / Nivel: <span id="lbl-param-val">65</span>%</label>
+              <input type="range" id="rng-widget-val" min="0" max="100" value="65" />
+            </div>
+            <div class="param-row" id="row-param-style">
+              <label>Estilo:</label>
+              <select id="sel-widget-style">
+                <option value="solid">Sólido continuo</option>
+                <option value="segmented">Segmentado (VU meter)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="wpreview-actions">
+            <button class="btn-primary btn-full" id="btn-insert-widget">Insertar en Canvas</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Generador y Simulador de Menús -->
+<div class="modal-overlay hidden" id="modal-menu-designer">
+  <div class="modal modal-xlarge">
+    <div class="modal-header">
+      <h2>📑 Generador y Simulador de Menús OLED</h2>
+      <button class="modal-close" data-close="modal-menu-designer">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="menu-designer-layout">
+        <!-- Columna Izquierda: Configuración y Lista de Ítems -->
+        <div class="menu-config-col">
+          <div class="menu-panel-card">
+            <div class="menu-card-title">Configuración del Menú</div>
+            <div class="menu-form-row">
+              <label>Título de Cabecera:</label>
+              <input type="text" id="menu-header-title" value="AJUSTES" placeholder="Ej: MENU, AJUSTES..." />
+            </div>
+            <div class="menu-form-row">
+              <label>Estilo Visual:</label>
+              <select id="menu-style-select">
+                <option value="inverted">Barra Invertida (Resaltado)</option>
+                <option value="arrow">Flecha Cursor ( > Opción )</option>
+                <option value="dot">Punto / Bullet ( ● Opción )</option>
+                <option value="boxed">Caja con Borde</option>
+              </select>
+            </div>
+            <div class="menu-form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="menu-chk-scrollbar" checked /> Barra de Scroll lateral
+              </label>
+            </div>
+          </div>
+
+          <!-- Editor de Ítems -->
+          <div class="menu-panel-card" style="flex: 1; display: flex; flex-direction: column;">
+            <div class="menu-card-title-row">
+              <span class="menu-card-title">Ítems del Menú</span>
+              <button class="btn-action-sm" id="btn-add-menu-item">+ Ítem</button>
+            </div>
+            <div class="menu-items-list" id="menu-items-list">
+              <!-- Lista de ítems generados dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Central: Simulador Físico / Pantalla y Controles de Navegación -->
+        <div class="menu-simulator-col">
+          <div class="sim-screen-container">
+            <div class="sim-oled-frame">
+              <canvas id="menu-simulator-canvas" width="128" height="64"></canvas>
+            </div>
+          </div>
+
+          <!-- D-Pad y Botones de Hardware simulados -->
+          <div class="sim-keypad">
+            <div class="sim-dpad">
+              <button class="sim-btn sim-btn-up" id="sim-btn-up" title="Arriba (W / ↑)">▲</button>
+              <div class="sim-dpad-middle">
+                <button class="sim-btn sim-btn-left" id="sim-btn-left" title="Atrás / Decrementar (A / ←)">◀</button>
+                <button class="sim-btn sim-btn-enter" id="sim-btn-enter" title="Seleccionar / Enter (Enter / Espacio)">●</button>
+                <button class="sim-btn sim-btn-right" id="sim-btn-right" title="Siguiente / Incrementar (D / →)">▶</button>
+              </div>
+              <button class="sim-btn sim-btn-down" id="sim-btn-down" title="Abajo (S / ↓)">▼</button>
+            </div>
+            <div class="sim-keypad-hint">
+              <span>Navega con <b>↑ / ↓</b>, activa con <b>Enter</b>, ajusta valores con <b>← / →</b>.</span>
+            </div>
+          </div>
+
+          <div class="sim-actions-row">
+            <button class="btn-secondary" id="btn-stamp-menu" title="Copiar estado actual del menú al editor principal">Estampar en Canvas</button>
+            <button class="btn-primary" id="btn-gen-menu-code" title="Ver o copiar el código de navegación C++ / Python">Exportar Código</button>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Vista Previa del Código Generado para el Menú -->
+        <div class="menu-code-col">
+          <div class="menu-code-header">
+            <div class="menu-platform-tabs">
+              <button class="tplat-btn active" data-tplat="arduino">Arduino C++</button>
+              <button class="tplat-btn" data-tplat="python">MicroPython</button>
+            </div>
+            <button class="btn-action-sm" id="btn-copy-menu-code">Copiar</button>
+          </div>
+          <pre class="menu-code-preview" id="menu-code-preview"><code>// Código generado del menú...</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Importar GIF / Video con Dithering -->
+<div class="modal-overlay hidden" id="modal-gif-import">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>🖼️ Importar Animación (GIF / Video) con Dithering</h2>
+      <button class="modal-close" data-close="modal-gif-import">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="media-import-layout">
+        <div class="media-drop-col">
+          <div class="gif-drop-zone" id="gif-drop-zone">
+            <div style="font-size: 36px; margin-bottom: 8px;">🎬</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">Arrastra un archivo GIF o Video (MP4 / WebM)</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Se descompondrá en fotogramas a la resolución activa</div>
+            <button class="btn-secondary" type="button">Seleccionar Archivo</button>
+            <input type="file" id="gif-file-input" accept=".gif,video/mp4,video/webm,image/*" style="display:none;" />
+          </div>
+          <div class="gif-import-status" id="gif-import-status">Ningún archivo seleccionado</div>
+        </div>
+        <div class="media-options-col">
+          <div class="media-options-box">
+            <div class="menu-card-title">Opciones de Conversión 1-Bit</div>
+            <div class="menu-form-row">
+              <label>Umbral de Binarización: <b id="gif-threshold-val">128</b></label>
+              <input type="range" id="gif-threshold-range" min="1" max="254" value="128" />
+            </div>
+            <div class="menu-form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="gif-dither-check" checked /> Dithering Floyd-Steinberg (Gradientes suaves)
+              </label>
+            </div>
+            <div class="menu-form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="gif-contrast-check" checked /> Auto-Contraste de Histograma
+              </label>
+            </div>
+            <div class="menu-form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="gif-invert-check" /> Invertir Colores (Líneas oscuras en fondo claro)
+              </label>
+            </div>
+          </div>
+          <div class="media-preview-box">
+            <div class="menu-card-title">Previsualización OLED</div>
+            <canvas id="gif-preview-canvas" width="128" height="64"></canvas>
+          </div>
+          <button class="btn-primary btn-full" id="btn-apply-imported-frames">Aplicar Fotogramas a Línea de Tiempo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Generador de Códigos QR -->
+<div class="modal-overlay hidden" id="modal-qr-code">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🏁 Generador de Códigos QR 1-Bit</h2>
+      <button class="modal-close" data-close="modal-qr-code">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="menu-form-row" style="margin-bottom: 12px;">
+        <label>Texto, URL o Credenciales WiFi:</label>
+        <input type="text" id="qr-text-input" value="https://github.com" placeholder="Ej: https://... o WIFI:S:Red;P:pass;;" />
+      </div>
+      <div class="menu-form-row" style="margin-bottom: 12px;">
+        <label>Escala de Módulo:</label>
+        <select id="qr-scale-select">
+          <option value="1">1x (Muy compacto)</option>
+          <option value="2" selected>2x (Estándar para 128x64)</option>
+          <option value="3">3x (Grande)</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: center; background: #020305; padding: 12px; border-radius: 6px; margin-bottom: 16px; border: 1px solid var(--border);">
+        <canvas id="qr-preview-canvas" width="128" height="64" style="image-rendering: pixelated;"></canvas>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-secondary" style="flex: 1;" id="btn-stamp-qr">Estampar en Canvas</button>
+        <button class="btn-primary" style="flex: 1;" id="btn-qr-add-frame">+ Como Nuevo Fotograma</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Plantillas de Animaciones -->
+<div class="modal-overlay hidden" id="modal-anim-templates">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>📦 Plantillas y Diseños Animados para OLED</h2>
+      <button class="modal-close" data-close="modal-anim-templates">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="widget-search-bar" style="margin-bottom: 12px;">
+        <input type="text" id="anim-search-input" placeholder="Buscar animación (ej: reloj, pacman, matrix, wifi, corazon, ojos, lluvia)..." />
+        <div class="widget-cat-tabs" id="anim-cat-tabs">
+          <button class="wcat-btn anim-cat-btn active" data-acat="all">Todos</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="robot">🤖 Ojos & Caras</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="dashboard">⌚ Relojes & Dash</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="fx">✨ Efectos & FX</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="hardware">🔋 Hardware & Señal</button>
+          <button class="wcat-btn anim-cat-btn" data-acat="games">🎮 Juegos & Retro</button>
+        </div>
+      </div>
+      <div class="anim-templates-grid" id="anim-templates-grid">
+        <!-- Tarjetas dinámicas -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Transmisión en Vivo a Hardware Real -->
+<div class="modal-overlay hidden" id="modal-live-hardware">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>🔌 Transmisión en Vivo a Display Físico</h2>
+      <button class="modal-close" data-close="modal-live-hardware">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="hw-stream-layout">
+        <div class="hw-stream-left">
+          <div class="hw-stream-status-box">
+            <span class="hw-dot offline" id="hw-stream-dot"></span>
+            <span id="hw-stream-status" style="font-weight: 600;">Desconectado</span>
+          </div>
+
+          <div class="menu-panel-card">
+            <div class="menu-card-title">Opción 1: Conexión USB Serial (COM)</div>
+            <div class="menu-form-row" style="margin-top: 6px; margin-bottom: 8px;">
+              <label>Puerto COM Arduino:</label>
+              <div style="display: flex; gap: 6px;">
+                <select id="hw-serial-port-select" class="form-select" style="flex:1;">
+                  <option value="">Detectando puertos...</option>
+                </select>
+                <button id="btn-hw-refresh-ports" class="btn-icon" title="Volver a escanear puertos COM">↻</button>
+              </div>
+            </div>
+            <button class="btn-primary btn-full" id="btn-hw-connect-serial">Conectar USB (Serial)</button>
+            <div class="i2c-detected-card" id="hw-i2c-card">
+              <div class="i2c-card-header">
+                <span class="i2c-tag">🔌 Pines I2C Detectados</span>
+                <span class="i2c-board-name" id="hw-i2c-board-name">Arduino Mega 2560</span>
+              </div>
+              <div class="i2c-pins-grid">
+                <div class="i2c-pin-item sda">
+                  <span class="pin-role">SDA (Datos)</span>
+                  <span class="pin-val" id="hw-i2c-pin-sda">Pin 20</span>
+                </div>
+                <div class="i2c-pin-item scl">
+                  <span class="pin-role">SCL (Reloj)</span>
+                  <span class="pin-val" id="hw-i2c-pin-scl">Pin 21</span>
+                </div>
+                <div class="i2c-pin-item vcc">
+                  <span class="pin-role">VCC</span>
+                  <span class="pin-val" id="hw-i2c-pin-vcc">5V</span>
+                </div>
+                <div class="i2c-pin-item gnd">
+                  <span class="pin-role">GND</span>
+                  <span class="pin-val" id="hw-i2c-pin-gnd">GND</span>
+                </div>
+              </div>
+              <div class="i2c-pin-note" id="hw-i2c-pin-note">
+                ⚡ <strong>Arduino MEGA:</strong> SDA = <strong>Pin 20</strong> | SCL = <strong>Pin 21</strong> (¡NO usar A4/A5!).
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-panel-card">
+            <div class="menu-card-title">Opción 2: Conexión WiFi (ESP8266 / ESP32)</div>
+            <div class="menu-form-row">
+              <label>Dirección IP de la placa:</label>
+              <input type="text" id="hw-wifi-ip" value="192.168.1.100" />
+            </div>
+            <button class="btn-secondary btn-full" id="btn-hw-connect-wifi">Conectar por WiFi</button>
+          </div>
+
+          <div class="menu-panel-card">
+            <label class="checkbox-label" style="font-size: 11px; font-weight: 600;">
+              <input type="checkbox" id="hw-auto-sync-check" /> Sincronizar en tiempo real al editar/animar
+            </label>
+            <button class="btn-secondary btn-full" id="btn-hw-send-frame" style="margin-top: 6px;">Enviar Fotograma Actual</button>
+          </div>
+        </div>
+
+        <div class="hw-stream-right">
+          <div class="menu-card-title-row">
+            <span class="menu-card-title">Sketch Receptor para Arduino / ESP32</span>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-action-sm" id="btn-copy-receiver-sketch">Copiar Sketch</button>
+              <button class="btn-primary-sm btn-upload" id="btn-hw-upload-sketch" style="background: #10b981; color: #fff; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; box-shadow: 0 2px 6px rgba(16,185,129,0.4);">⚡ Subir a la Placa</button>
+            </div>
+          </div>
+          <pre class="hw-sketch-code" id="hw-receiver-sketch-code"><code>// Sketch Receptor para Transmisión en Vivo OLED Designer
+#include &lt;SPI.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_GFX.h&gt;
+#include &lt;Adafruit_SSD1306.h&gt;
+
+// ============================================================
+// CONEXIÓN DE PINES I2C:
+// - Arduino MEGA 2560:  SDA -&gt; Pin 20 | SCL -&gt; Pin 21  (¡NO usar A4 y A5!)
+// - Arduino UNO / Nano: SDA -&gt; Pin A4 | SCL -&gt; Pin A5
+// - ESP32:              SDA -&gt; GPIO 21 | SCL -&gt; GPIO 22
+// ============================================================
+
+#define ANCHO_PANTALLA 128
+#define ALTO_PANTALLA  64
+#define OLED_RESET     -1
+Adafruit_SSD1306 display(ANCHO_PANTALLA, ALTO_PANTALLA, &Wire, OLED_RESET);
+
+uint8_t buffer[1024];
+
+void setup() {
+  Serial.begin(115200);
+
+  // Inicializar pantalla con dirección 0x3C (o 0x3D si es clon)
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)) {
+      Serial.println(F("Fallo al iniciar SSD1306"));
+      for(;;);
+    }
+  }
+  
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 10);
+  display.println(F("Hola Mundo!"));
+  display.setTextSize(2);
+  display.setCursor(0, 30);
+  display.println(F("Arduino"));
+  display.display();
+}
+
+void loop() {
+  if (Serial.available() &gt;= 4) {
+    if (Serial.peek() != 0xAA) {
+      Serial.read();
+      return;
+    }
+    Serial.read(); // 0xAA
+    if (Serial.read() == 0x55) {
+      uint8_t w = Serial.read();
+      uint8_t h = Serial.read();
+      size_t expected = (w * h) / 8;
+      size_t readBytes = Serial.readBytes((char*)buffer, expected);
+      if (readBytes == expected) {
+        display.clearDisplay();
+        display.drawBitmap(0, 0, buffer, w, h, SSD1306_WHITE);
+        display.display();
+      }
+    }
+  }
+}</code></pre>
+          <div id="hw-upload-log" class="arduino-log hidden" style="margin-top: 8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Apartado de Ayuda y Manual Completo (README.md) -->
+<div class="modal-overlay hidden" id="modal-help">
+  <div class="modal modal-xlarge modal-help-dialog">
+    <div class="modal-header">
+      <h2>📖 Manual de Ayuda y Documentación — OLED Designer</h2>
+      <button class="modal-close" data-close="modal-help">×</button>
+    </div>
+    <div class="modal-body help-modal-body">
+      <div class="help-content-container">
+        <!-- Encabezado y Badges -->
+        <div class="help-header-hero">
+          <h1>⚡ OLED Designer — Suite Profesional de Diseño y Emulación OLED</h1>
+          <div class="help-badges-row">
+            <span class="help-badge badge-green">Node.js 18+</span>
+            <span class="help-badge badge-blue">Electron Desktop</span>
+            <span class="help-badge badge-purple">Licencia MIT</span>
+            <span class="help-badge badge-orange">SSD1306 | SH1106 | SSD1309 | SSD1331 | SSD1351</span>
+          </div>
+          <p class="help-intro-text">
+            <strong>OLED Designer</strong> es una aplicación de escritorio integral y de alto rendimiento para diseñar, animar, simular y generar código para pantallas OLED monocromáticas y a color utilizadas en sistemas embebidos (<strong>Arduino, ESP32, ESP8266, Raspberry Pi Pico, STM32</strong> y más).
+          </p>
+          <p class="help-intro-sub">
+            Combina un editor de dibujo en tiempo real, un sistema de animación por fotogramas múltiples (Timeline con Onion Skin), un generador y simulador físico de menús interactivos, un importador de GIFs con Dithering Floyd-Steinberg, un generador de códigos QR 1-bit, un catálogo de widgets paramétricos, modo de pantalla dual (Dual Screen <code>0x3C</code>/<code>0x3D</code>) y streaming en vivo por USB Serial y WiFi directamente a la pantalla real.
+          </p>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 📑 Tabla de Contenidos -->
+        <div class="help-section">
+          <h2>📑 Tabla de Contenidos</h2>
+          <div class="help-toc-grid">
+            <a href="#help-sec-features" class="help-toc-link">1. Características Principales</a>
+            <a href="#help-sec-install" class="help-toc-link">2. Instalación y Requisitos</a>
+            <a href="#help-sec-quickstart" class="help-toc-link">3. Guía de Inicio Rápido</a>
+            <a href="#help-sec-modules" class="help-toc-link">4. Módulos del Sistema</a>
+            <a href="#help-sec-codegen" class="help-toc-link">5. Generación de Código Multi-Plataforma</a>
+            <a href="#help-sec-ai" class="help-toc-link">6. Inteligencia Artificial Integrada</a>
+            <a href="#help-sec-shortcuts" class="help-toc-link">7. Atajos de Teclado</a>
+            <a href="#help-sec-structure" class="help-toc-link">8. Estructura del Proyecto</a>
+            <a href="#help-sec-db" class="help-toc-link">9. Base de Datos y Persistencia Local</a>
+          </div>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 🚀 1. Características Principales -->
+        <div class="help-section" id="help-sec-features">
+          <h2>🚀 1. Características Principales</h2>
+          <ul class="help-list">
+            <li><strong>Editor 1-bit pixel-perfect:</strong> Lienzo con zoom de 1x a 16x, centrado automático, cuadrícula configurable y soporte de resoluciones estándar y personalizadas.</li>
+            <li><strong>Herramientas de dibujo completas:</strong> Lápiz, borrador con 5 calibres y borrado rápido con clic derecho, líneas, rectángulos (huecos y rellenos), círculos, relleno por inundación (bucket) y cuentagotas.</li>
+            <li><strong>Capas de texto editables:</strong> Arrastre interactivo, alineación (izquierda, centro, derecha), tamaño en tiempo real, edición inline con doble clic y rasterizado al lienzo con "Fijar al Canvas".</li>
+            <li><strong>Exportación PNG 1-bit pura:</strong> Codificador nativo W3C PNG monocromo de 1 bit por píxel sin compresión con pérdida.</li>
+            <li><strong>Simulador físico fotorrealista:</strong> Réplica de módulo OLED con acabado PCB personalizable (Azul, Negro mate, Púrpura ENIG), pines serigrafiados y 6 colores de display (Blanco, Azul, Amarillo, Verde, Amarillo/Azul split y RGB).</li>
+            <li><strong>Línea de tiempo para animaciones:</strong> Control cuadro a cuadro, tira de miniaturas en vivo (<em>Filmstrip</em>), papel cebolla (<em>Onion Skinning</em>), selector de 1 a 24 FPS y bucle de reproducción.</li>
+            <li><strong>Generador de menús con D-Pad físico:</strong> Simulador interactivo navegable con flechas del teclado o botones táctiles en pantalla, con soporte de opciones de acción, toggles y rangos numéricos.</li>
+            <li><strong>Conversor GIF y Video a 1-bit:</strong> Algoritmo de difusión de error Floyd-Steinberg, binarización adaptativa, auto-contraste e inyección automática en la timeline.</li>
+            <li><strong>Códigos QR 1-bit integrados:</strong> Motor Reed-Solomon autónomo y sin dependencias externas para URLs, textos y WiFi.</li>
+            <li><strong>Streaming directo a hardware (USB Serial & WiFi):</strong> Transmisión en milisegundos de cada fotograma al microcontrolador real sin tener que compilar ni flashear.</li>
+            <li><strong>Modo Pantalla Dual:</strong> Edición y exportación de código sincronizado para 2 pantallas OLED en simultáneo (<code>0x3C</code> y <code>0x3D</code>).</li>
+            <li><strong>Generadores de código nativos:</strong> Código C++, Python y Rust optimizado con diagramas de pines para Arduino Uno, Nano, ESP32, ESP8266 y Raspberry Pi Pico.</li>
+          </ul>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 📋 2. Instalación y Requisitos -->
+        <div class="help-section" id="help-sec-install">
+          <h2>📋 2. Instalación y Requisitos</h2>
+          <table class="help-table">
+            <thead>
+              <tr>
+                <th>Componente</th>
+                <th>Versión Recomendada</th>
+                <th>Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Sistema Operativo</strong></td>
+                <td>Windows 10/11, Linux (Ubuntu/Debian)</td>
+                <td>Probado en entornos x64</td>
+              </tr>
+              <tr>
+                <td><strong>Node.js</strong></td>
+                <td>18.0 o superior</td>
+                <td>Entorno de ejecución principal</td>
+              </tr>
+              <tr>
+                <td><strong>npm</strong></td>
+                <td>9.0 o superior</td>
+                <td>Gestor de paquetes</td>
+              </tr>
+              <tr>
+                <td><strong>PostgreSQL</strong></td>
+                <td>13.0 o superior</td>
+                <td><em>Opcional:</em> La app funciona 100% offline con <code>localStorage</code> si no hay base de datos instalada</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- ⚡ 3. Guía de Inicio Rápido -->
+        <div class="help-section" id="help-sec-quickstart">
+          <h2>⚡ 3. Guía de Inicio Rápido</h2>
+          <h3>En Windows:</h3>
+          <p><strong>Opción 1 — Instalador Automatizado:</strong></p>
+          <pre class="help-code"><code>INSTALL.bat</code></pre>
+          <p><strong>Opción 2 — Inicio Rápido:</strong></p>
+          <pre class="help-code"><code>INICIAR.bat</code></pre>
+          <p>O para iniciar la aplicación sin ventana de terminal de fondo:</p>
+          <pre class="help-code"><code>INICIAR_OCULTO.vbs</code></pre>
+          <p><strong>Opción 3 — Desde Consola / Terminal:</strong></p>
+          <pre class="help-code"><code>npm install
+npm start</code></pre>
+          <h3>En Linux:</h3>
+          <pre class="help-code"><code>npm install
+npm start
+
+# Para construir el paquete instalable .deb:
+python3 scripts/build_deb.py</code></pre>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 🧩 4. Módulos del Sistema -->
+        <div class="help-section" id="help-sec-modules">
+          <h2>🧩 4. Módulos del Sistema</h2>
+
+          <div class="help-card-feature">
+            <h3>1. Editor Visual y Herramientas</h3>
+            <p><strong>Lápiz (<code>P</code>):</strong> Dibujo continuo píxel a píxel con tamaños de 1px a 4px.</p>
+            <p><strong>Borrador (<code>E</code>):</strong> Borrado multicalibre (1px, 2px, 4px, 8px, 12px) con cursor circular rojo de previsualización. También puedes borrar al instante manteniendo pulsado el <strong>botón derecho del ratón</strong>.</p>
+            <p><strong>Figuras Geométricas:</strong> Líneas rectas (<code>L</code>), Rectángulos huecos y rellenos (<code>R</code>), Círculos y elipses (<code>C</code>).</p>
+            <p><strong>Bote de Relleno (<code>F</code>):</strong> Algoritmo Flood-Fill de llenado de regiones contiguas cerradas.</p>
+            <p><strong>Cuentagotas (<code>D</code>):</strong> Muestreo rápido de color en el punto del cursor.</p>
+            <p><strong>Capas de Texto Editables (<code>T</code>):</strong> Permite escribir textos con fuente de 5×7 px, arrastrarlos libremente por el canvas, cambiar su tamaño y alineación (izquierda, centro, derecha), editarlos con doble clic y fijarlos definitivamente al bitmap con el botón <strong>"Fijar al Canvas"</strong>.</p>
+            <p><strong>Transformaciones de Lienzo:</strong> Invertir píxeles, Voltear H / V, Desplazamiento cardinal (Shift ↑ ↓ ← →) y Limpiar Todo.</p>
+            <p><strong>Exportación PNG 1-Bit:</strong> Botón "PNG 1-bit" en la barra superior que genera una imagen PNG monocromática indexada (1 bit/pixel) con paleta binaria limpia para documentación, hojas de datos o impresión.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>2. Simulador de Hardware Físico</h3>
+            <p>Modal interactivo accesible desde el botón <strong><code>Simulador</code></strong> de la barra superior.</p>
+            <p><strong>Acabados de PCB:</strong> Azul clásico, Negro mate profesional y Púrpura ENIG con contactos dorados.</p>
+            <p><strong>Pines serigrafiados:</strong> Identificación de terminales físicos: <code>GND</code>, <code>VCC</code>, <code>SCL</code>, <code>SDA</code>.</p>
+            <p><strong>Paletas de Color OLED:</strong> Blanco puro, Azul neón, Amarillo ámbar, Verde matriz, Amarillo/Azul dividido (Dual Split 16/48px) y Modo RGB.</p>
+            <p><strong>Acciones:</strong> Botones para copiar la captura del módulo al portapapeles o descargar la foto HD en PNG.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>3. Biblioteca de Widgets e Iconos 1-Bit (<code>widgets.js</code>)</h3>
+            <p>Accesible mediante el botón <strong><code>🧩 Widgets</code></strong> o pulsando la tecla <strong><code>W</code></strong>.</p>
+            <p><strong>30+ Iconos Vectorizados para 1-bit:</strong> Baterías (100%, 75%, 50%, 25%, Cargando ⚡), WiFi (3 niveles), Bluetooth, USB, Termómetro, Gota de humedad, Sol, Rayo, Corazón, Velocímetro, Engranaje, Candado, Campana, Alerta, Checkmark, Cruz, Reloj y Flechas de control.</p>
+            <p><strong>Widgets Paramétricos Pro:</strong> Barra de progreso deslizable (continua o segmentada VU meter), Tacómetro analógico (Gauge Dial con aguja en vivo), Barra de Estado superior (Header Bar de 128px con WiFi/Batería), Mini Gráfica Sparkline y Tarjeta Sensor Metric Card.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>4. Sistema de Animaciones y Línea de Tiempo</h3>
+            <p>Accesible mediante el botón <strong><code>🎬 Animación</code></strong> o el atajo <strong><code>Shift + A</code></strong>.</p>
+            <p><strong>Barra de Línea de Tiempo (Timeline):</strong> Se despliega en la parte inferior del espacio de trabajo con Tira de Miniaturas (<em>Filmstrip</em>) interactiva.</p>
+            <p><strong>Gestión Cuadro a Cuadro:</strong> <code>+ Frame</code> (crear), <code>⧉ Duplicar</code> (clonar) y <code>🗑 Borrar</code> (eliminar).</p>
+            <p><strong>🧅 Papel Cebolla (Onion Skinning):</strong> Muestra el fotograma anterior con un resplandor translúcido naranja (<code>rgba(255, 128, 0, 0.4)</code>) por debajo del dibujo actual para guiar la animación fluida.</p>
+            <p><strong>Controles de Reproducción:</strong> Botones <code>⏮ Primero</code>, <code>◀ Anterior</code>, <code>▶ / ⏸ Play / Pausa</code> (atajo <strong>Espacio</strong>), <code>Siguiente ▶</code>, <code>⏭ Último</code>, selector de velocidad de 1 a 24 FPS y bucle continuo (Loop).</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>5. Generador y Simulador de Menús OLED (<code>menuDesigner.js</code>)</h3>
+            <p>Accesible mediante el botón <strong><code>📑 Menús</code></strong> o la tecla <strong><code>M</code></strong>.</p>
+            <p><strong>4 Estilos Visuales:</strong> Barra Invertida (highlight blanco con texto negro), Flecha Cursor (<code>&gt;</code>), Punto Bullet (<code>●</code>) y Caja con Borde.</p>
+            <p><strong>Tipos de Elementos:</strong> Acciones, Toggles <code>[ON]</code>/<code>[OFF]</code> y Rangos/Valores numéricos.</p>
+            <p><strong>Simulador Físico con D-Pad:</strong> Navegable con botones virtuales o teclas <strong><code>↑</code>/<code>↓</code></strong> para desplazarse, <strong><code>Enter</code></strong> para accionar y <strong><code>←</code>/<code>→</code></strong> para modificar valores.</p>
+            <p><strong>Acciones:</strong> Botón <strong>"Estampar en Canvas"</strong> y generador de código C++ Arduino y MicroPython listo con <code>INPUT_PULLUP</code>.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>6. Importador de GIFs y Videos con Dithering (<code>gifDecoder.js</code>)</h3>
+            <p>Accesible mediante el botón <strong><code>GIF/Video</code></strong>.</p>
+            <p>Acepta archivos <code>.gif</code>, videos <code>.mp4</code>, <code>.webm</code> e imágenes estándar.</p>
+            <p><strong>Dithering Floyd-Steinberg:</strong> Difusión de error que recrea gradientes analógicos suaves en 1 bit monocromo puro.</p>
+            <p><strong>Controles:</strong> Slider de umbral de binarización (1 a 254), auto-contraste de histograma e inversión de colores.</p>
+            <p><strong>Aplicar a Timeline:</strong> Transfiere todos los fotogramas procesados a la Línea de Tiempo en un clic.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>7. Generador de Códigos QR 1-Bit (<code>qrGenerator.js</code>)</h3>
+            <p>Accesible mediante el botón <strong><code>QR</code></strong>.</p>
+            <p><strong>Motor Reed-Solomon Integrado:</strong> Genera códigos QR Version 1 (21×21) a Version 3 (29×29) de forma 100% offline para URLs, textos y redes WiFi.</p>
+            <p><strong>Escalas:</strong> 1x, 2x y 3x con zona silenciosa blanca para lectura óptica perfecta en smartphones.</p>
+            <p><strong>Acciones:</strong> Estampar en canvas o agregar como nuevo fotograma.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>8. Biblioteca de Plantillas y Diseños Animados (<code>animTemplates.js</code>)</h3>
+            <p>Accesible mediante el botón <strong><code>Plantillas</code></strong>.</p>
+            <p>Colección de más de 18 animaciones listas agrupadas en categorías: <strong>🎮 Juegos</strong> (Pac-Man Arcade, Latido de Corazón, Pelota Rebotando), <strong>✨ Efectos FX</strong> (Warp Speed 3D, Lluvia Matrix, Ripple, Lluvia, Seno), <strong>⌚ Relojes</strong> (Digital 7-Seg, Analógico), <strong>🔋 Hardware</strong> (Batería, Señal Móvil, ECG, Radar, Spinner) y <strong>🤖 Ojos/Caras</strong> (Smiley, Ojos Cozmo).</p>
+            <p>Buscador interactivo en vivo, previsualización animada a FPS reales en cada tarjeta y carga instantánea a la Línea de Tiempo.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>9. Modo Doble Pantalla OLED (Dual Screen)</h3>
+            <p>Accesible mediante el botón <strong><code>Dual OLED</code></strong>.</p>
+            <p>Permite alternar y editar independientemente la <strong>Pantalla A (0x3C)</strong> y la <strong>Pantalla B (0x3D)</strong>.</p>
+            <p>Genera el sketch Arduino C++ unificado con <code>displayA</code> y <code>displayB</code> inicializados y sincronizados en el <code>loop()</code>.</p>
+          </div>
+
+          <div class="help-card-feature">
+            <h3>10. Transmisión en Vivo y Subida Directa a Placa (1-Click Upload)</h3>
+            <p>Accesible mediante el botón <strong><code>Hardware</code></strong> (con indicador LED de conexión).</p>
+            <p><strong>Detección de Placas e Identificación de Pines I2C:</strong> Reconoce automáticamente Arduino Mega 2560 (pines 20/21), Uno/Nano (A4/A5), Leonardo (2/3), ESP32 (21/22), ESP8266 (D2/D1) y Raspberry Pi Pico RP2040 (GP4/GP5) con tarjetas visuales del conexionado.</p>
+            <p><strong>Subida Directa (<code>⚡ Subir a la Placa</code>):</strong> Compila y flashea el sketch receptor automáticamente a la placa con un clic gracias a <code>arduino-cli</code> sin necesidad de herramientas externas.</p>
+            <p><strong>Conexión Serie Nativa Node.js:</strong> Transmisión ultra rápida y estable sin bloqueos a 115200 baudios.</p>
+            <p><strong>WiFi Streaming:</strong> Envío inalámbrico a la dirección IP de un ESP8266 o ESP32.</p>
+            <p><strong>Sketch Receptor con Autodiagnóstico:</strong> Detección automática de direcciones I2C 0x3C / 0x3D y alerta con LED 13.</p>
+          </div>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 💻 5. Generación de Código Multi-Plataforma -->
+        <div class="help-section" id="help-sec-codegen">
+          <h2>💻 5. Generación de Código Multi-Plataforma</h2>
+          <p>El generador <code>src/codeGen.js</code> produce código limpio y listo para compilar en:</p>
+          <ul class="help-list">
+            <li><strong>Arduino + Adafruit GFX:</strong> Inicialización I2C (400kHz) y SPI con pinouts, PROGMEM bitmaps, loops de animación y soporte de doble pantalla.</li>
+            <li><strong>U8g2:</strong> Constructores para hardware/software I2C y SPI con <code>u8g2.drawXBMP()</code>.</li>
+            <li><strong>MicroPython:</strong> Control para Raspberry Pi Pico y ESP32 con <code>ssd1306.py</code> y <code>framebuf.MONO_HLSB</code>.</li>
+            <li><strong>CircuitPython:</strong> Módulos <code>adafruit_ssd1306</code> y <code>adafruit_framebuf</code>.</li>
+            <li><strong>C Array Puro (<code>.h</code>):</strong> Cabeceras de bytes exportables para cualquier microcontrolador.</li>
+            <li><strong>Rust:</strong> Compatible con la librería <code>embedded-graphics</code> y <code>ImageRaw&lt;BinaryColor&gt;</code>.</li>
+            <li><strong>JavaScript / Canvas:</strong> Emulador web interactivo.</li>
+          </ul>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 🤖 6. Inteligencia Artificial Integrada -->
+        <div class="help-section" id="help-sec-ai">
+          <h2>🤖 6. Inteligencia Artificial Integrada</h2>
+          <p><strong>1. Motor Local Heurístico (100% Offline y Gratuito):</strong></p>
+          <ul class="help-list">
+            <li>Analiza densidad de píxeles, centro de masa y patrones visuales.</li>
+            <li>Detecta regiones de texto y marcos para sugerir llamadas vectoriales (<code>display.println()</code>, <code>display.drawRect()</code>) que ahorran memoria RAM.</li>
+            <li>Inserta comentarios didácticos en español y diagramas de pines físicos según la placa seleccionada.</li>
+          </ul>
+          <p><strong>2. Motor Cloud OpenAI (Opcional):</strong></p>
+          <p>Compatible con <code>gpt-4o-mini</code> definiendo la variable de entorno <code>OPENAI_API_KEY</code>.</p>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- ⌨️ 7. Atajos de Teclado -->
+        <div class="help-section" id="help-sec-shortcuts">
+          <h2>⌨️ 7. Atajos de Teclado</h2>
+          <table class="help-table">
+            <thead>
+              <tr>
+                <th>Atajo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>P</strong></td><td>Herramienta <strong>Lápiz</strong></td></tr>
+              <tr><td><strong>E</strong></td><td>Herramienta <strong>Borrador</strong></td></tr>
+              <tr><td><strong>L</strong></td><td>Herramienta <strong>Línea recta</strong></td></tr>
+              <tr><td><strong>R</strong></td><td>Herramienta <strong>Rectángulo</strong></td></tr>
+              <tr><td><strong>C</strong></td><td>Herramienta <strong>Círculo</strong></td></tr>
+              <tr><td><strong>F</strong></td><td>Herramienta <strong>Bote de Relleno</strong></td></tr>
+              <tr><td><strong>T</strong></td><td>Insertar o editar <strong>Capa de Texto</strong></td></tr>
+              <tr><td><strong>D</strong></td><td>Herramienta <strong>Cuentagotas</strong></td></tr>
+              <tr><td><strong>W</strong></td><td>Abrir biblioteca de <strong>Widgets e Iconos</strong></td></tr>
+              <tr><td><strong>M</strong></td><td>Abrir <strong>Diseñador y Simulador de Menús</strong></td></tr>
+              <tr><td><strong>Shift + A</strong></td><td>Desplegar / Ocultar <strong>Línea de Tiempo (Timeline)</strong></td></tr>
+              <tr><td><strong>Espacio</strong></td><td><strong>Play / Pausa</strong> de la animación</td></tr>
+              <tr><td><strong>F1</strong></td><td>Abrir este <strong>Manual de Ayuda</strong></td></tr>
+              <tr><td><strong>Ctrl + Z</strong></td><td>Deshacer (<em>Undo</em>)</td></tr>
+              <tr><td><strong>Ctrl + Y</strong> / <strong>Ctrl + Shift + Z</strong></td><td>Rehacer (<em>Redo</em>)</td></tr>
+              <tr><td><strong>Ctrl + S</strong></td><td>Guardar Proyecto</td></tr>
+              <tr><td><strong>Ctrl + E</strong></td><td>Abrir modal de <strong>Exportar Código</strong></td></tr>
+              <tr><td><strong>Ctrl + I</strong></td><td>Generar código asistido por <strong>IA</strong></td></tr>
+              <tr><td><strong>Ctrl + G</strong></td><td>Alternar <strong>Cuadrícula</strong> (Grid)</td></tr>
+              <tr><td><strong>Ctrl + +</strong> / <strong>Ctrl + -</strong></td><td>Aumentar / Disminuir <strong>Zoom</strong></td></tr>
+              <tr><td><strong>Ctrl + 0</strong></td><td>Ajustar Zoom al centro del lienzo (<em>Fit</em>)</td></tr>
+              <tr><td><strong>Clic Derecho</strong></td><td>Borrado rápido instantáneo en el lienzo</td></tr>
+              <tr><td><strong>Doble Clic (Texto)</strong></td><td>Editar texto de la capa directamente</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 📁 8. Estructura del Proyecto -->
+        <div class="help-section" id="help-sec-structure">
+          <h2>📁 8. Estructura del Proyecto</h2>
+          <pre class="help-code"><code>EMULADOR_OLED/
+├── main.js                  # Proceso principal de Electron y gestión de ventanas
+├── preload.js               # Puente de comunicación seguro IPC
+├── package.json             # Dependencias y scripts de ejecución
+├── db.config.json           # Configuración de base de datos (con fallback offline)
+├── README.md                # Documentación maestra del repositorio
+├── INSTALL.bat              # Script instalador automatizado para Windows (raíz)
+├── INICIAR.bat              # Script lanzador rápido para Windows (raíz)
+├── INICIAR_OCULTO.vbs       # Lanzador silencioso sin ventana de terminal
+├── renderer/                # Frontend y lógica visual del cliente
+│   ├── index.html           # Estructura de la interfaz de usuario y modales
+│   ├── style.css            # Estilos CSS, diseño oscuro, animaciones y simuladores
+│   ├── app.js               # Núcleo del editor, gestión de canvas y eventos
+│   ├── widgets.js           # Catálogo de iconos 1-bit y widgets paramétricos
+│   ├── menuDesigner.js      # Diseñador y simulador de menús con D-Pad
+│   ├── gifDecoder.js        # Decodificador de GIFs/Video y Dithering Floyd-Steinberg
+│   ├── qrGenerator.js       # Generador de códigos QR 1-bit Reed-Solomon
+│   ├── animTemplates.js     # Presets de animaciones (ojos robot, ECG, loaders, radar)
+│   └── liveHardware.js      # Transmisión en vivo por USB Serial y WiFi
+├── src/                     # Backend Node.js de la aplicación
+│   ├── codeGen.js           # Generador de código C++, Python, Rust y Dual Screen
+│   ├── aiModule.js          # Análisis heurístico inteligente y soporte OpenAI
+│   ├── projects.js          # Lógica CRUD de proyectos y persistencia
+│   └── db.js                # Conexión resiliente a PostgreSQL (con modo offline)
+├── sql/                     # Esquemas relacionales de base de datos
+│   ├── Base De Datos.sql    # DDL con tablas de drivers, proyectos y versiones
+│   └── base_de_datos_pg.sql # Datos iniciales con librerías y resoluciones
+└── scripts/                 # Scripts de utilidad y despliegue
+    ├── INSTALL.bat          # Instalador auxiliar
+    ├── INICIAR.bat          # Lanzador auxiliar
+    ├── INICIAR_OCULTO.vbs   # Lanzador silencioso
+    ├── setup_postgres.ps1   # Configurador automatizado de PostgreSQL
+    └── build_deb.py         # Constructor de paquetes .deb para Linux</code></pre>
+        </div>
+
+        <hr class="help-divider" />
+
+        <!-- 🗄️ 9. Base de Datos y Persistencia Local -->
+        <div class="help-section" id="help-sec-db">
+          <h2>🗄️ 9. Base de Datos y Persistencia Local</h2>
+          <p><strong>1. Modo Local Offline (Por defecto):</strong></p>
+          <p>Si no tienes PostgreSQL instalado o configurado, la aplicación detecta automáticamente la ausencia del servicio y activa el <strong>Modo Offline</strong>. Los proyectos, fotogramas y configuraciones se guardan localmente en el almacenamiento seguro de la aplicación (<code>localStorage</code> de Electron y archivos <code>.oled</code>), permitiendo trabajar sin conexión a internet ni bases de datos activas.</p>
+          <p><strong>2. Modo PostgreSQL (Opcional):</strong></p>
+          <p>Para activar la base de datos relacional completa, ejecuta PowerShell como Administrador:</p>
+          <pre class="help-code"><code>powershell -ExecutionPolicy Bypass -File scripts\setup_postgres.ps1</code></pre>
+          <p>Almacena historial de versiones (hasta 20 por proyecto), plantillas de drivers personalizadas y metadatos relacionales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Texto (Input flotante en canvas) -->
+<div class="floating-text-input hidden" id="floating-text-input">
+  <input type="text" id="floating-text-field" placeholder="Escribe y presiona Enter" />
+</div>
+
+<!-- Toast de notificaciones -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Input oculto para importar imágenes -->
+<input type="file" id="file-image-input" accept="image/*" style="display:none;" />
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="widgets.js"></script>
+<script src="menuDesigner.js"></script>
+<script src="gifDecoder.js"></script>
+<script src="qrGenerator.js"></script>
+<script src="animTemplates.js"></script>
+<script src="liveHardware.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

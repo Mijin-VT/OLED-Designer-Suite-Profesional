@@ -1,4 +1,4 @@
-# ⚡ OLED Designer — Suite Profesional de Diseño y Emulación OLED
+# ⚡ OLED Designer — Suite Profesional
 
 <p align="center">
   <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED" width="75%">

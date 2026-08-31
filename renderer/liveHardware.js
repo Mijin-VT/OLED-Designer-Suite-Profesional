@@ -169,7 +169,7 @@ async function connectSerialHardware() {
   const portSelect = document.getElementById('hw-serial-port-select');
   const targetPort = portSelect?.value || 'COM6';
 
-  // 1. Usar comunicación nativa de Electron (100% confiable y directa)
+  // 1. Usar comunicación nativa de Electron IPC (no bloqueante)
   if (window.electronAPI?.connectSerial) {
     try {
       const res = await window.electronAPI.connectSerial({ port: targetPort, baudRate: 115200 });
@@ -178,42 +178,55 @@ async function connectSerialHardware() {
         LiveHardwareStreamer.streamMode = 'serial';
         LiveHardwareStreamer.selectedPort = targetPort;
         updateHardwareStatusUI();
-        showToast(`¡Conectado exitosamente por USB a ${targetPort}! ✓`, 'success');
-        sendCurrentBitmapToHardware();
+        showToast(`¡Conectado a ${targetPort}! (Esperando inicio de placa...) ✓`, 'success');
+
+        // Esperar 1.5s a que el bootloader del microcontrolador finalice su auto-reset
+        setTimeout(() => {
+          if (LiveHardwareStreamer.isConnected) {
+            sendCurrentBitmapToHardware();
+          }
+        }, 1500);
         return;
       } else {
         throw new Error(res.error || 'No se pudo abrir el puerto');
       }
     } catch (err) {
-      showToast(`Error al abrir ${targetPort}: ${err.message}`, 'error');
+      console.warn('[IPC Serial Connect Error, trying WebSerial fallback]:', err);
+    }
+  }
+
+  // 2. Fallback WebSerial nativo del navegador Chromium
+  if (navigator.serial) {
+    try {
+      if (window.electronAPI?.setTargetSerialPort) {
+        await window.electronAPI.setTargetSerialPort(targetPort);
+      }
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+
+      LiveHardwareStreamer.port = port;
+      LiveHardwareStreamer.writer = port.writable.getWriter();
+      LiveHardwareStreamer.isConnected = true;
+      LiveHardwareStreamer.streamMode = 'serial';
+      LiveHardwareStreamer.selectedPort = targetPort;
+
+      updateHardwareStatusUI();
+      showToast(`¡Conectado por puerto USB Serial a 115200 baudios! ✓`, 'success');
+
+      // Esperar 1.5s a que el bootloader finalice el auto-reset
+      setTimeout(() => {
+        if (LiveHardwareStreamer.isConnected) {
+          sendCurrentBitmapToHardware();
+        }
+      }, 1500);
+      return;
+    } catch (err) {
+      showToast(`Error de conexión serie: ${err.message}`, 'error');
       return;
     }
   }
 
-  // 2. Fallback WebSerial para navegadores
-  if (!navigator.serial) {
-    showToast('WebSerial no está soportado en este entorno', 'error');
-    return;
-  }
-
-  try {
-    if (window.electronAPI?.setTargetSerialPort) {
-      await window.electronAPI.setTargetSerialPort(targetPort);
-    }
-    const port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 115200 });
-
-    LiveHardwareStreamer.port = port;
-    LiveHardwareStreamer.writer = port.writable.getWriter();
-    LiveHardwareStreamer.isConnected = true;
-    LiveHardwareStreamer.streamMode = 'serial';
-
-    updateHardwareStatusUI();
-    showToast(`¡Conectado por puerto USB Serial a 115200 baudios! ✓`, 'success');
-    sendCurrentBitmapToHardware();
-  } catch (err) {
-    showToast(`Error de conexión serie: ${err.message}`, 'error');
-  }
+  showToast('No se pudo conectar al puerto COM seleccionado', 'error');
 }
 
 async function disconnectHardware() {
@@ -286,17 +299,27 @@ async function sendCurrentBitmapToHardware() {
       packet[3] = H;
       packet.set(bytes, 4);
 
-      if (window.electronAPI?.writeSerial) {
-        await window.electronAPI.writeSerial({ data: Array.from(packet) });
-      } else if (LiveHardwareStreamer.writer) {
-        await LiveHardwareStreamer.writer.write(packet);
+      if (LiveHardwareStreamer.writer) {
+        await Promise.race([
+          LiveHardwareStreamer.writer.write(packet),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de transmisión')), 1200))
+        ]);
+      } else if (window.electronAPI?.writeSerial) {
+        const res = await Promise.race([
+          window.electronAPI.writeSerial({ data: Array.from(packet) }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de transmisión')), 1200))
+        ]);
+        if (res && !res.success) {
+          console.warn('[Stream write]:', res.error);
+        }
       }
     } else if (LiveHardwareStreamer.streamMode === 'wifi') {
       const ip = LiveHardwareStreamer.wifiIp;
       await fetch(`http://${ip}:80/oled/frame`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/octet-stream' },
-        body: bytes
+        body: bytes,
+        signal: AbortSignal.timeout(2000)
       });
     }
   } catch (err) {

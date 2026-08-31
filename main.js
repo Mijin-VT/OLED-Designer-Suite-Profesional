@@ -760,43 +760,63 @@ function registerIPCHandlers() {
   });
 
   ipcMain.handle('serial:connect', async (event, { port, baudRate = 115200 }) => {
-    try {
-      if (activeSerialHandle !== null) {
-        try { fs.closeSync(activeSerialHandle); } catch (_) {}
-        activeSerialHandle = null;
-      }
-
-      const cleanPort = (port || desiredSerialPort || 'COM6').toUpperCase();
-      desiredSerialPort = cleanPort;
-
+    return new Promise((resolve) => {
       try {
-        exec(`mode ${cleanPort}: BAUD=${baudRate} PARITY=N DATA=8 STOP=1`, { timeout: 3000 });
-      } catch (_) {}
+        if (activeSerialHandle !== null) {
+          try { fs.close(activeSerialHandle, () => {}); } catch (_) {}
+          activeSerialHandle = null;
+        }
 
-      const fd = fs.openSync(`\\\\.\\${cleanPort}`, 'r+');
-      activeSerialHandle = fd;
-      activeSerialPortName = cleanPort;
-      return { success: true, port: cleanPort };
-    } catch (err) {
-      console.error('[Native Serial Connect Error]:', err.message);
-      return { success: false, error: err.message };
-    }
+        const cleanPort = (port || desiredSerialPort || 'COM6').toUpperCase();
+        desiredSerialPort = cleanPort;
+
+        // Timeout de seguridad: nunca bloquear el proceso principal
+        const timer = setTimeout(() => {
+          resolve({ success: false, error: `Tiempo de espera agotado al abrir ${cleanPort}` });
+        }, 2500);
+
+        fs.open(`\\\\.\\${cleanPort}`, 'r+', (err, fd) => {
+          clearTimeout(timer);
+          if (err) {
+            console.error('[Native Serial Connect Error]:', err.message);
+            return resolve({ success: false, error: err.message });
+          }
+          activeSerialHandle = fd;
+          activeSerialPortName = cleanPort;
+          resolve({ success: true, port: cleanPort });
+        });
+      } catch (err) {
+        resolve({ success: false, error: err.message });
+      }
+    });
   });
 
   ipcMain.handle('serial:write', async (event, { data }) => {
     if (activeSerialHandle === null) return { success: false, error: 'Puerto no conectado' };
-    try {
-      const buffer = Buffer.from(data);
-      fs.writeSync(activeSerialHandle, buffer, 0, buffer.length);
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
+    return new Promise((resolve) => {
+      try {
+        const buffer = Buffer.from(data);
+        // Timeout de seguridad de 800ms para evitar que la app quede 'No responde' si la placa no drena el buffer
+        const writeTimeout = setTimeout(() => {
+          resolve({ success: false, error: 'Timeout de transmisión serie' });
+        }, 800);
+
+        fs.write(activeSerialHandle, buffer, 0, buffer.length, null, (err) => {
+          clearTimeout(writeTimeout);
+          if (err) {
+            return resolve({ success: false, error: err.message });
+          }
+          resolve({ success: true });
+        });
+      } catch (err) {
+        resolve({ success: false, error: err.message });
+      }
+    });
   });
 
   ipcMain.handle('serial:disconnect', async () => {
     if (activeSerialHandle !== null) {
-      try { fs.closeSync(activeSerialHandle); } catch (_) {}
+      try { fs.close(activeSerialHandle, () => {}); } catch (_) {}
       activeSerialHandle = null;
       activeSerialPortName = null;
     }

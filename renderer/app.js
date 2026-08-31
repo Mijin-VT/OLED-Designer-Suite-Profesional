@@ -193,6 +193,76 @@ function countONPixels() {
 }
 
 // ============================================================
+// MONITOR DE MÉTRICAS EN TOOLBAR (RAM, Flash, Consumo y Píxeles)
+// ============================================================
+
+function updateToolbarMetrics() {
+  const ramValEl = document.getElementById('metric-ram-val');
+  const flashValEl = document.getElementById('metric-flash-val');
+  const powerValEl = document.getElementById('metric-power-val');
+  const pixelsValEl = document.getElementById('metric-pixels-val');
+  const memChipEl = document.getElementById('metric-chip-memory');
+  const pwrChipEl = document.getElementById('metric-chip-power');
+
+  if (!ramValEl || !powerValEl) return;
+
+  const w = State.width || 128;
+  const h = State.height || 64;
+  const totalPixels = w * h;
+  const onPixels = countONPixels();
+  const onPercent = totalPixels > 0 ? ((onPixels / totalPixels) * 100).toFixed(1) : '0.0';
+
+  // 1. Cálculo de Memoria (RAM y Flash)
+  const ramBytes = Math.ceil(totalPixels / 8);
+  const unoRamTotal = 2048; // 2 KB de RAM en Arduino Uno / Nano (ATmega328P)
+  const unoRamPercent = Math.round((ramBytes / unoRamTotal) * 100);
+
+  // Flash PROGMEM = bytes por frame * número de frames
+  const numFrames = (State.frames && State.frames.length > 0) ? State.frames.length : 1;
+  const flashBytes = ramBytes * numFrames;
+  const flashKB = (flashBytes / 1024).toFixed(1);
+
+  // Formato RAM
+  let ramText = `RAM: ${ramBytes} B`;
+  if (ramBytes >= 1024) {
+    ramText = `RAM: ${(ramBytes / 1024).toFixed(1)} KB`;
+  }
+  ramValEl.innerHTML = `${ramText} <span class="metric-sub">(${unoRamPercent}% Uno)</span>`;
+
+  // Formato Flash
+  let flashText = `Flash: ${flashKB} KB`;
+  if (numFrames > 1) {
+    flashText += ` <span class="metric-sub">(${numFrames}f)</span>`;
+  }
+  flashValEl.innerHTML = flashText;
+
+  // Alerta visual de memoria si excede capacidad de un Arduino Uno
+  if (memChipEl) {
+    memChipEl.classList.remove('metric-warning', 'metric-danger');
+    if (ramBytes > 1536 || flashBytes > 25000) {
+      memChipEl.classList.add('metric-danger');
+    } else if (ramBytes > 1024 || flashBytes > 16000) {
+      memChipEl.classList.add('metric-warning');
+    }
+    memChipEl.title = `Monitor de Memoria Embebida:\n• Buffer de pantalla en RAM: ${ramBytes} Bytes (${unoRamPercent}% de Arduino Uno / Nano de 2 KB)\n• Flash de bitmaps (PROGMEM): ${flashBytes} Bytes (${flashKB} KB) en ${numFrames} fotograma(s)\n• En ESP32 / ESP8266 / RP2040: < 1% de uso de RAM`;
+  }
+
+  // 2. Cálculo de Consumo Eléctrico Estimado (SSD1306)
+  const baseScale = totalPixels / (128 * 64);
+  const baseCurrent_mA = 6.0 * Math.max(0.5, Math.min(2.0, baseScale));
+  const pixelCurrent_mA = onPixels * 0.023;
+  const totalCurrent_mA = (baseCurrent_mA + pixelCurrent_mA).toFixed(1);
+  const power_mW = (parseFloat(totalCurrent_mA) * 3.3).toFixed(1);
+
+  powerValEl.textContent = `⚡ ~${totalCurrent_mA} mA`;
+  pixelsValEl.textContent = `${onPixels} / ${totalPixels} (${onPercent}%)`;
+
+  if (pwrChipEl) {
+    pwrChipEl.title = `Consumo Eléctrico Estimado (Display OLED a 3.3V):\n• Corriente base del circuito: ~${baseCurrent_mA.toFixed(1)} mA\n• Corriente de emisión OLED: ~${pixelCurrent_mA.toFixed(1)} mA\n• Corriente total estimada: ~${totalCurrent_mA} mA\n• Potencia estimada: ~${power_mW} mW @ 3.3V\n• Píxeles activos: ${onPixels} de ${totalPixels} (${onPercent}%)`;
+  }
+}
+
+// ============================================================
 // COMPOSICIÓN Y RENDERIZADO DE CAPAS DE ELEMENTOS INTERACTIVOS
 // ============================================================
 
@@ -550,9 +620,10 @@ function renderCanvas() {
     }
   }
 
-  // Actualizar statusbar
+  // Actualizar statusbar y métricas en toolbar
   document.getElementById('pixel-count').textContent = `Píxeles ON: ${countONPixels()}`;
   document.getElementById('canvas-size-display').textContent = `${State.width} × ${State.height}`;
+  updateToolbarMetrics();
 
   // Notificar streaming a hardware físico si está conectado
   if (typeof notifyCanvasUpdatedForHardware === 'function') {
@@ -3403,6 +3474,8 @@ function updateTimelineUI() {
   if (badge) {
     badge.textContent = `Frame ${State.currentFrameIndex + 1} / ${State.frames.length}`;
   }
+
+  updateToolbarMetrics();
 
   const filmstrip = document.getElementById('timeline-filmstrip');
   if (!filmstrip) return;

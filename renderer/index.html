@@ -88,6 +88,18 @@
     </button>
   </div>
 
+  <!-- Fila 1 Col 3: Monitor de Memoria (RAM & Flash) -->
+  <div class="toolbar-metric-chip toolbar-metric-memory" id="metric-chip-memory" title="Monitor de Memoria: RAM del buffer y Flash PROGMEM">
+    <div class="metric-chip-icon">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+    </div>
+    <div class="metric-chip-content">
+      <span class="metric-chip-primary" id="metric-ram-val">RAM: 1024 B <span class="metric-sub">(50% Uno)</span></span>
+      <span class="metric-chip-divider">|</span>
+      <span class="metric-chip-secondary" id="metric-flash-val">Flash: 1.0 KB</span>
+    </div>
+  </div>
+
   <!-- Fila 2 Col 1: Espacio que alinea exactamente debajo de Archivo -->
   <div class="toolbar-spacer"></div>
 
@@ -140,6 +152,18 @@
       <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Preview
     </button>
+  </div>
+
+  <!-- Fila 2 Col 3: Consumo Eléctrico Estimado y Píxeles ON (Punto 3) -->
+  <div class="toolbar-metric-chip toolbar-metric-power" id="metric-chip-power" title="Consumo Eléctrico Estimado para Display OLED a 3.3V/5V">
+    <div class="metric-chip-icon">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="metric-chip-content">
+      <span class="metric-chip-primary" id="metric-power-val">⚡ ~6.0 mA</span>
+      <span class="metric-chip-divider">•</span>
+      <span class="metric-chip-secondary" id="metric-pixels-val">0 / 8192 (0%)</span>
+    </div>
   </div>
 </div>
 

@@ -95,10 +95,6 @@ Haz doble clic en:
 ```bat
 INICIAR.bat
 ```
-O para iniciar la aplicación sin ventana de terminal de fondo:
-```vbs
-INICIAR_OCULTO.vbs
-```
 
 ##### Opción B — Desde Consola / Terminal:
 ```powershell

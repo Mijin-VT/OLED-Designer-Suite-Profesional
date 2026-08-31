@@ -818,10 +818,15 @@ function registerIPCHandlers() {
 
   ipcMain.handle('serial:disconnect', async () => {
     if (activeSerialHandle !== null) {
-      try { fs.close(activeSerialHandle, () => {}); } catch (_) {}
+      try {
+        fs.closeSync(activeSerialHandle);
+      } catch (err) {
+        console.warn('[fs.closeSync warn]:', err.message);
+      }
       activeSerialHandle = null;
       activeSerialPortName = null;
     }
+    await new Promise(r => setTimeout(r, 300));
     return { success: true };
   });
 

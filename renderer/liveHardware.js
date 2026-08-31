@@ -167,35 +167,12 @@ async function connectSerialHardware() {
   const portSelect = document.getElementById('hw-serial-port-select');
   const targetPort = portSelect?.value || 'COM6';
 
-  // 1. Usar comunicación nativa de Electron IPC (no bloqueante)
-  if (window.electronAPI?.connectSerial) {
-    try {
-      const res = await window.electronAPI.connectSerial({ port: targetPort, baudRate: 115200 });
-      if (res && res.success) {
-        LiveHardwareStreamer.isConnected = true;
-        LiveHardwareStreamer.streamMode = 'serial';
-        LiveHardwareStreamer.selectedPort = targetPort;
-        updateHardwareStatusUI();
-        showToast(`¡Conectado a ${targetPort}! (Esperando inicio de placa...) ✓`, 'success');
-
-        // Esperar 1.5s a que el bootloader del microcontrolador finalice su auto-reset
-        setTimeout(() => {
-          if (LiveHardwareStreamer.isConnected) {
-            sendCurrentBitmapToHardware();
-          }
-        }, 1500);
-        return;
-      } else {
-        throw new Error(res.error || 'No se pudo abrir el puerto');
-      }
-    } catch (err) {
-      console.warn('[IPC Serial Connect Error, trying WebSerial fallback]:', err);
-    }
-  }
-
-  // 2. Fallback WebSerial nativo del navegador Chromium
+  // 1. Usar WebSerial nativo de Chromium (comunicación asíncrona aislada y sin bloqueos de OS)
   if (navigator.serial) {
     try {
+      // Asegurarse de liberar cualquier conexión previa antes de abrir
+      await disconnectHardware();
+
       if (window.electronAPI?.setTargetSerialPort) {
         await window.electronAPI.setTargetSerialPort(targetPort);
       }
@@ -209,9 +186,9 @@ async function connectSerialHardware() {
       LiveHardwareStreamer.selectedPort = targetPort;
 
       updateHardwareStatusUI();
-      showToast(`¡Conectado por puerto USB Serial a 115200 baudios! ✓`, 'success');
+      showToast(`¡Conectado por USB Serial a ${targetPort}! ✓`, 'success');
 
-      // Esperar 1.5s a que el bootloader finalice el auto-reset
+      // Esperar 1.5s a que el bootloader del Arduino finalice su auto-reset
       setTimeout(() => {
         if (LiveHardwareStreamer.isConnected) {
           sendCurrentBitmapToHardware();
@@ -219,7 +196,35 @@ async function connectSerialHardware() {
       }, 1500);
       return;
     } catch (err) {
-      showToast(`Error de conexión serie: ${err.message}`, 'error');
+      console.warn('[WebSerial open error]:', err);
+      showToast(`Error al abrir puerto serie: ${err.message}`, 'error');
+      return;
+    }
+  }
+
+  // 2. Fallback comunicación Electron IPC si no estuviese WebSerial
+  if (window.electronAPI?.connectSerial) {
+    try {
+      await disconnectHardware();
+      const res = await window.electronAPI.connectSerial({ port: targetPort, baudRate: 115200 });
+      if (res && res.success) {
+        LiveHardwareStreamer.isConnected = true;
+        LiveHardwareStreamer.streamMode = 'serial';
+        LiveHardwareStreamer.selectedPort = targetPort;
+        updateHardwareStatusUI();
+        showToast(`¡Conectado a ${targetPort}! (Esperando inicio de placa...) ✓`, 'success');
+
+        setTimeout(() => {
+          if (LiveHardwareStreamer.isConnected) {
+            sendCurrentBitmapToHardware();
+          }
+        }, 1500);
+        return;
+      } else {
+        throw new Error(res.error || 'No se pudo abrir el puerto');
+      }
+    } catch (err) {
+      showToast(`Error al abrir ${targetPort}: ${err.message}`, 'error');
       return;
     }
   }

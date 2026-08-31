@@ -100,7 +100,7 @@ O para iniciar la aplicación sin ventana de terminal de fondo:
 INICIAR_OCULTO.vbs
 ```
 
-##### Opción C — Desde Consola / Terminal:
+##### Opción B — Desde Consola / Terminal:
 ```powershell
 npm install
 npm start

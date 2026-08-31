@@ -1,7 +1,7 @@
 {
-  "name": "oled-designer",
+  "name": "oled-designer-suite-professional",
   "version": "1.0.0",
-  "description": "OLED Display Designer — Visual editor for OLED screens with code export",
+  "description": "OLED-Designer-Suite-Professional — Suite Profesional de Diseño, Animación y Emulación OLED",
   "main": "main.js",
   "author": "OLED Designer Team",
   "license": "MIT",
@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "com.oleddesigner.app",
-    "productName": "OLED Designer",
+    "productName": "OLED-Designer-Suite-Professional",
     "icon": "assets/icons/icon",
     "directories": {
       "output": "dist"

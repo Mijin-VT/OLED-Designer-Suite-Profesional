@@ -1,13 +1,13 @@
-# ⚡ OLED Designer — Suite Profesional de Diseño y Emulación OLED
+# ⚡ OLED-Designer-Suite-Professional
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Electron](https://img.shields.io/badge/Electron-Desktop-blue.svg)](https://www.electronjs.org/)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-purple.svg)](#-licencia)
 [![Hardware](https://img.shields.io/badge/OLED-SSD1306%20%7C%20SH1106%20%7C%20SSD1309-orange.svg)]()
 
-**OLED Designer** es una aplicación de escritorio integral y de alto rendimiento para diseñar, animar, simular y generar código para pantallas OLED monocromáticas y a color utilizadas en sistemas embebidos (**Arduino, ESP32, ESP8266, Raspberry Pi Pico, STM32** y más).
+**OLED-Designer-Suite-Professional** es una aplicación de escritorio integral y de alto rendimiento para diseñar, animar, simular y generar código para pantallas OLED monocromáticas y a color utilizadas en sistemas embebidos (**Arduino, ESP32, ESP8266, Raspberry Pi Pico, STM32** y más).
 
-Combina un editor de dibujo en tiempo real, un sistema de animación por fotogramas múltiples (Timeline con Onion Skin), un generador y simulador físico de menús interactivos, un importador de GIFs con Dithering Floyd-Steinberg, un generador de códigos QR 1-bit, un catálogo de widgets paramétricos, modo de pantalla dual (Dual Screen `0x3C`/`0x3D`) y streaming en vivo por USB Serial y WiFi directamente a la pantalla real.
+Combina un editor de dibujo en tiempo real, un sistema de animación por fotogramas múltiples (Timeline con Onion Skin), un generador y simulador físico de menús interactivos, un importador de GIFs con Dithering Floyd-Steinberg, un generador de códigos QR 1-bit, un catálogo de widgets paramétricos, modo de pantalla dual (Dual Screen `0x3C`/`0x3D`) y streaming en vivo por USB Serial y WiFi directamente a la pantalla real con subida en 1 clic.
 
 ---
 

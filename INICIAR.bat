@@ -44,10 +44,13 @@ if not exist "node_modules\electron\dist\electron.exe" (
     call npm install electron --save-dev >nul 2>&1
 )
 
-:: 4. Lanzar la aplicación
+:: 4. Lanzar la aplicacion directamente en segundo plano (sin dejar ventana CMD)
 echo [OK] Iniciando OLED Designer...
-echo.
 
-start "" npm start
+if exist "%~dp0node_modules\electron\dist\electron.exe" (
+    start "" "%~dp0node_modules\electron\dist\electron.exe" "%~dp0."
+) else (
+    start "" npm start
+)
 
-exit /b 0
+exit

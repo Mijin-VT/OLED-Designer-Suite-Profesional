@@ -227,7 +227,7 @@ function updateToolbarMetrics() {
   if (ramBytes >= 1024) {
     ramText = `RAM: ${(ramBytes / 1024).toFixed(1)} KB`;
   }
-  ramValEl.innerHTML = `${ramText} <span class="metric-sub">(${unoRamPercent}% Uno)</span>`;
+  ramValEl.innerHTML = `${ramText} <span class="metric-sub">(${unoRamPercent}%)</span>`;
 
   // Formato Flash
   let flashText = `Flash: ${flashKB} KB`;
@@ -255,7 +255,7 @@ function updateToolbarMetrics() {
   const power_mW = (parseFloat(totalCurrent_mA) * 3.3).toFixed(1);
 
   powerValEl.textContent = `⚡ ~${totalCurrent_mA} mA`;
-  pixelsValEl.textContent = `${onPixels} / ${totalPixels} (${onPercent}%)`;
+  pixelsValEl.textContent = `${onPixels} px (${onPercent}%)`;
 
   if (pwrChipEl) {
     pwrChipEl.title = `Consumo Eléctrico Estimado (Display OLED a 3.3V):\n• Corriente base del circuito: ~${baseCurrent_mA.toFixed(1)} mA\n• Corriente de emisión OLED: ~${pixelCurrent_mA.toFixed(1)} mA\n• Corriente total estimada: ~${totalCurrent_mA} mA\n• Potencia estimada: ~${power_mW} mW @ 3.3V\n• Píxeles activos: ${onPixels} de ${totalPixels} (${onPercent}%)`;

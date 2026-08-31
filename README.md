@@ -2,7 +2,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Electron](https://img.shields.io/badge/Electron-Desktop-blue.svg)](https://www.electronjs.org/)
-[![Licencia](https://img.shields.io/badge/Licencia-MIT-purple.svg)]()
+[![Licencia](https://img.shields.io/badge/Licencia-MIT-purple.svg)](#-licencia)
 [![Hardware](https://img.shields.io/badge/OLED-SSD1306%20%7C%20SH1106%20%7C%20SSD1309-orange.svg)]()
 
 **OLED Designer** es una aplicación de escritorio integral y de alto rendimiento para diseñar, animar, simular y generar código para pantallas OLED monocromáticas y a color utilizadas en sistemas embebidos (**Arduino, ESP32, ESP8266, Raspberry Pi Pico, STM32** y más).
@@ -62,22 +62,32 @@ Combina un editor de dibujo en tiempo real, un sistema de animación por fotogra
 | **Sistema Operativo** | Windows 10/11, Linux (Ubuntu/Debian) | Probado en entornos x64 |
 | **Node.js** | 18.0 o superior | Entorno de ejecución principal |
 | **npm** | 9.0 o superior | Gestor de paquetes |
+| **Git LFS** | 3.0 o superior | Necesario para descargar binarios pesados (`arduino-cli.exe`) |
 | **PostgreSQL** | 13.0 o superior | *Opcional*: La app funciona 100% offline con `localStorage` si no hay base de datos instalada |
 
 ---
 
 ## ⚡ Guía de Inicio Rápido
 
-### En Windows:
+### 1. Clonar el Repositorio (con Git LFS):
+```bash
+git clone https://github.com/Mijin-VT/OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED.git
+cd OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED
+git lfs pull
+```
 
-#### Opción 1 — Instalador Automatizado:
+### 2. Ejecutar la Aplicación:
+
+#### En Windows:
+
+##### Opción A — Instalador Automatizado:
 Haz doble clic en el archivo:
 ```bat
 INSTALL.bat
 ```
 *(Instala dependencias, configura el entorno y verifica los componentes necesarios).*
 
-#### Opción 2 — Inicio Rápido:
+##### Opción B — Inicio Rápido:
 Haz doble clic en:
 ```bat
 INICIAR.bat
@@ -87,13 +97,13 @@ O para iniciar la aplicación sin ventana de terminal de fondo:
 INICIAR_OCULTO.vbs
 ```
 
-#### Opción 3 — Desde Consola / Terminal:
+##### Opción C — Desde Consola / Terminal:
 ```powershell
 npm install
 npm start
 ```
 
-### En Linux:
+#### En Linux:
 ```bash
 npm install
 npm start
@@ -270,7 +280,7 @@ python3 scripts/build_deb.py
 
 ## 💻 Generación de Código Multi-Plataforma
 
-El módulo [`src/codeGen.js`](file:///d:/Desktop/AGENTES/EMULADOR_OLED/src/codeGen.js) analiza el bitmap y genera código limpio, documentado y optimizado para las principales plataformas:
+El módulo [`src/codeGen.js`](src/codeGen.js) analiza el bitmap y genera código limpio, documentado y optimizado para las principales plataformas:
 
 ### Plataformas Soportadas:
 1. **Arduino + Adafruit GFX**:
@@ -299,7 +309,7 @@ El módulo [`src/codeGen.js`](file:///d:/Desktop/AGENTES/EMULADOR_OLED/src/codeG
 
 ## 🤖 Inteligencia Artificial Integrada
 
-OLED Designer cuenta con dos modos de generación asistida en [`src/aiModule.js`](file:///d:/Desktop/AGENTES/EMULADOR_OLED/src/aiModule.js):
+OLED Designer cuenta con dos modos de generación asistida en [`src/aiModule.js`](src/aiModule.js):
 
 1. **Motor Local Heurístico (100% Offline y Gratuito)**:
    - Analiza la densidad de píxeles y el centro de masa del diseño.
@@ -347,10 +357,15 @@ OLED Designer cuenta con dos modos de generación asistida en [`src/aiModule.js`
 
 ```
 EMULADOR_OLED/
+├── bin/                     # Binarios integrados (gestionados vía Git LFS)
+│   ├── arduino-cli.exe      # Motor de compilación y flasheo para 1-Click Upload
+│   └── LICENSE.txt          # Licencia GPLv3 de Arduino CLI
 ├── main.js                  # Proceso principal de Electron y gestión de ventanas
 ├── preload.js               # Puente de comunicación seguro IPC (Renderer <-> Main)
 ├── package.json             # Dependencias y scripts de ejecución
-├── db.config.json           # Configuración de base de datos PostgreSQL (con fallback offline)
+├── package-lock.json        # Árbol de dependencias bloqueadas
+├── db.config.example.json   # Plantilla de configuración PostgreSQL
+├── db.config.json           # Configuración local (ignorado en git por seguridad)
 ├── INSTALL.bat              # Script instalador automatizado para Windows (raíz)
 ├── INICIAR.bat              # Script lanzador rápido para Windows (raíz)
 ├── INICIAR_OCULTO.vbs       # Lanzador silencioso sin ventana de terminal

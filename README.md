@@ -91,7 +91,6 @@ INSTALL.bat
 ```
 *(Instala dependencias, configura el entorno y verifica los componentes necesarios).*
 
-##### Opción B — Inicio Rápido:
 Haz doble clic en:
 ```bat
 INICIAR.bat

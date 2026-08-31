@@ -1,5 +1,9 @@
 # ⚡ OLED Designer — Suite Profesional de Diseño y Emulación OLED
 
+<p align="center">
+  <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Profesional-de-Dise-o-y-Emulaci-n-OLED" width="100%">
+</p>
+
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Electron](https://img.shields.io/badge/Electron-Desktop-blue.svg)](https://www.electronjs.org/)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-purple.svg)](#-licencia)

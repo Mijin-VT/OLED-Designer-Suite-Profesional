@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="IMAGEN2.JPG" alt="OLED-Designer-Suite-Professional - OLED Design and Emulation Suite" width="75%">
+  <img src="IMAGEN.JPG" alt="OLED-Designer-Suite-Professional - OLED Design and Emulation Suite" width="75%">
 </p>
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)

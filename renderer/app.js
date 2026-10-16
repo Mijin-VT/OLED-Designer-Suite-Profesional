@@ -70,6 +70,11 @@ const State = {
   screenA_bitmap: null,
   screenB_bitmap: null,
 
+  // Administrador de Pantallas Múltiples (Screens Manager)
+  screens: [],
+  activeScreenId: null,
+  screensPanelCollapsed: false,
+
   // Proyecto
   projectId: null,
   projectName: 'Sin título',
@@ -136,6 +141,7 @@ async function init() {
 
   // Crear bitmap inicial
   resetBitmap();
+  initScreens();
 
   // Configurar canvas
   resizeCanvases();
@@ -143,6 +149,7 @@ async function init() {
   // Listeners de UI
   bindToolButtons();
   bindToolbarButtons();
+  bindScreensPanel();
   bindRightPanel();
   bindModalButtons();
   bindKeyboard();
@@ -160,6 +167,7 @@ async function init() {
     if (wModal && !wModal.classList.contains('hidden') && typeof renderWidgetList === 'function') {
       renderWidgetList();
     }
+    updateScreensUI();
   });
 
   // Cargar datos desde DB
@@ -2385,6 +2393,17 @@ function applyResolution(w, h) {
     }
   }
 
+  // Actualizar pantalla activa
+  if (typeof getActiveScreen === 'function') {
+    const curScreen = getActiveScreen();
+    if (curScreen) {
+      curScreen.width = w;
+      curScreen.height = h;
+      curScreen.bitmap = State.bitmap.slice();
+    }
+    if (typeof updateScreensUI === 'function') updateScreensUI();
+  }
+
   pushHistory();
   resizeCanvases();
   renderCanvas();
@@ -3615,6 +3634,447 @@ function switchActiveScreen(screen) {
 }
 
 // ============================================================
+// ADMINISTRADOR DE PANTALLAS (SCREENS MANAGER)
+// ============================================================
+
+function generateScreenId() {
+  return 'scr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
+}
+
+function getNextScreenName() {
+  let highest = 0;
+  if (State.screens && State.screens.length > 0) {
+    for (const s of State.screens) {
+      const match = (s.name || '').match(/^Screen\s*(\d+)$/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > highest) highest = num;
+      }
+    }
+  }
+  return `Screen${highest + 1}`;
+}
+
+function screenBitmapToBase64(bitmap, width, height) {
+  if (!bitmap) return '';
+  const total = width * height;
+  const bytes = new Uint8Array(Math.ceil(total / 8));
+  for (let i = 0; i < total; i++) {
+    if (bitmap[i]) {
+      bytes[Math.floor(i / 8)] |= (1 << (7 - (i % 8)));
+    }
+  }
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function createScreen(customOpts = {}) {
+  const width = customOpts.width || State.width || 128;
+  const height = customOpts.height || State.height || 64;
+  let bitmap = customOpts.bitmap;
+  if (!bitmap || bitmap.length !== width * height) {
+    bitmap = new Uint8Array(width * height);
+  } else if (!(bitmap instanceof Uint8Array)) {
+    bitmap = new Uint8Array(bitmap);
+  }
+
+  return {
+    id: customOpts.id || generateScreenId(),
+    name: customOpts.name || getNextScreenName(),
+    width: width,
+    height: height,
+    bitmap: bitmap.slice(), // Clon independiente sin mutabilidad compartida
+    elements: customOpts.elements ? JSON.parse(JSON.stringify(customOpts.elements)) : [],
+    textElements: customOpts.textElements ? JSON.parse(JSON.stringify(customOpts.textElements)) : [],
+    displayColor: customOpts.displayColor || State.displayColor || 'white',
+    driverName: customOpts.driverName || State.driverName || 'SSD1306',
+    interfaceType: customOpts.interfaceType || State.interfaceType || 'I2C',
+    i2cAddress: customOpts.i2cAddress || State.i2cAddress || '0x3C',
+    history: customOpts.history ? [...customOpts.history] : [],
+    historyIndex: customOpts.historyIndex ?? -1
+  };
+}
+
+function getActiveScreen() {
+  if (!State.screens || State.screens.length === 0) return null;
+  return State.screens.find(s => s.id === State.activeScreenId) || State.screens[0];
+}
+
+function syncActiveScreen() {
+  const active = getActiveScreen();
+  if (!active) return;
+  active.width = State.width;
+  active.height = State.height;
+  if (State.bitmap) {
+    active.bitmap = State.bitmap.slice();
+  }
+  active.elements = State.elements ? JSON.parse(JSON.stringify(State.elements)) : [];
+  active.textElements = State.textElements ? JSON.parse(JSON.stringify(State.textElements)) : [];
+  active.displayColor = State.displayColor;
+  active.driverName = State.driverName;
+  active.interfaceType = State.interfaceType;
+  active.i2cAddress = State.i2cAddress;
+  active.history = State.history ? [...State.history] : [];
+  active.historyIndex = State.historyIndex;
+}
+
+function loadActiveScreen(skipSync = false) {
+  if (!skipSync) syncActiveScreen();
+  const active = getActiveScreen();
+  if (!active) return;
+
+  State.activeScreenId = active.id;
+  State.width = active.width;
+  State.height = active.height;
+  State.bitmap = active.bitmap.slice();
+  State.baseBitmap = new Uint8Array(State.width * State.height);
+  State.elements = active.elements ? JSON.parse(JSON.stringify(active.elements)) : [];
+  State.textElements = active.textElements ? JSON.parse(JSON.stringify(active.textElements)) : [];
+  State.selectedTextId = null;
+  State.transformObject = null;
+  State.selection = null;
+
+  // Restaurar historial
+  State.history = (active.history && active.history.length > 0) ? [...active.history] : [];
+  State.historyIndex = active.historyIndex ?? -1;
+  if (State.history.length === 0) {
+    pushHistory();
+  } else {
+    updateUndoRedoUI();
+  }
+
+  // Restaurar color y driver si existen en la pantalla
+  if (active.displayColor) {
+    State.displayColor = active.displayColor;
+    document.querySelectorAll('.display-color-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.dcolor === State.displayColor);
+    });
+  }
+  if (active.driverName) {
+    State.driverName = active.driverName;
+    const dSel = document.getElementById('driver-select');
+    if (dSel) dSel.value = State.driverName;
+    if (typeof updateDriverInfo === 'function') updateDriverInfo();
+  }
+  if (active.interfaceType) {
+    State.interfaceType = active.interfaceType;
+    document.querySelectorAll('.iface-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.iface === State.interfaceType);
+    });
+    const i2cDet = document.getElementById('i2c-detail');
+    const spiDet = document.getElementById('spi-detail');
+    if (i2cDet) i2cDet.classList.toggle('hidden', State.interfaceType !== 'I2C');
+    if (spiDet) spiDet.classList.toggle('hidden', State.interfaceType !== 'SPI');
+  }
+
+  // Actualizar selector de resolución
+  const resSelect = document.getElementById('resolution-select');
+  if (resSelect) {
+    const val = `${State.width}x${State.height}`;
+    const matchingOpt = Array.from(resSelect.options).find(opt => opt.value === val);
+    if (matchingOpt) {
+      resSelect.value = val;
+      document.getElementById('custom-res-group')?.classList.add('hidden');
+    } else {
+      resSelect.value = 'custom';
+      document.getElementById('custom-res-group')?.classList.remove('hidden');
+      const cw = document.getElementById('custom-width');
+      const ch = document.getElementById('custom-height');
+      if (cw) cw.value = State.width;
+      if (ch) ch.value = State.height;
+    }
+  }
+
+  // Barra de estado de dimensiones
+  const canvasSizeDisplay = document.getElementById('canvas-size-display');
+  if (canvasSizeDisplay) {
+    canvasSizeDisplay.textContent = `${State.width} × ${State.height}`;
+  }
+
+  resizeCanvases();
+  renderCanvas();
+  renderPreview();
+  updateScreensUI();
+}
+
+function initScreens(forceReset = false) {
+  if (forceReset || !State.screens || State.screens.length === 0) {
+    const firstScreen = createScreen({
+      name: 'Screen1',
+      width: State.width || 128,
+      height: State.height || 64,
+      bitmap: State.bitmap ? State.bitmap.slice() : new Uint8Array((State.width || 128) * (State.height || 64)),
+      elements: State.elements || [],
+      textElements: State.textElements || []
+    });
+    State.screens = [firstScreen];
+    State.activeScreenId = firstScreen.id;
+  }
+  updateScreensUI();
+}
+
+function addScreen(customOpts = {}) {
+  syncActiveScreen();
+
+  const newScreen = createScreen({
+    name: customOpts.name || getNextScreenName(),
+    width: customOpts.width || State.width || 128,
+    height: customOpts.height || State.height || 64,
+    bitmap: customOpts.bitmap,
+    elements: customOpts.elements,
+    textElements: customOpts.textElements
+  });
+
+  State.screens.push(newScreen);
+  State.activeScreenId = newScreen.id;
+
+  loadActiveScreen(true);
+  markDirty();
+  showToast(`Pantalla "${newScreen.name}" creada ✓`, 'success');
+  return newScreen;
+}
+
+function selectScreen(id) {
+  if (id === State.activeScreenId) return;
+  syncActiveScreen();
+  const target = State.screens.find(s => s.id === id);
+  if (!target) return;
+  State.activeScreenId = target.id;
+  loadActiveScreen(true);
+}
+
+function duplicateScreen(id) {
+  syncActiveScreen();
+  const original = State.screens.find(s => s.id === id);
+  if (!original) return;
+
+  // Generar nombre único para la copia
+  let copyName = `${original.name}_copy`;
+  let counter = 2;
+  while (State.screens.some(s => s.name === copyName)) {
+    copyName = `${original.name}_copy${counter++}`;
+  }
+
+  const dupScreen = createScreen({
+    name: copyName,
+    width: original.width,
+    height: original.height,
+    bitmap: original.bitmap.slice(),
+    elements: original.elements ? JSON.parse(JSON.stringify(original.elements)) : [],
+    textElements: original.textElements ? JSON.parse(JSON.stringify(original.textElements)) : [],
+    displayColor: original.displayColor,
+    driverName: original.driverName,
+    interfaceType: original.interfaceType,
+    i2cAddress: original.i2cAddress
+  });
+
+  const origIndex = State.screens.findIndex(s => s.id === id);
+  if (origIndex >= 0) {
+    State.screens.splice(origIndex + 1, 0, dupScreen);
+  } else {
+    State.screens.push(dupScreen);
+  }
+
+  State.activeScreenId = dupScreen.id;
+  loadActiveScreen(true);
+  markDirty();
+  showToast(`Pantalla duplicada como "${dupScreen.name}" ✓`, 'success');
+}
+
+function deleteScreen(id) {
+  if (State.screens.length <= 1) {
+    const errorMsg = (window.I18N && window.I18N.t('screen_del_last_error')) || 'No se puede eliminar la única pantalla del proyecto.';
+    showToast(errorMsg, 'warning');
+    return;
+  }
+
+  const target = State.screens.find(s => s.id === id);
+  if (!target) return;
+
+  const confirmMsg = (window.I18N && window.I18N.t('screen_del_confirm', { name: target.name })) ||
+    `¿Eliminar la pantalla "${target.name}"? Esta acción no se puede deshacer.`;
+
+  if (!confirm(confirmMsg)) return;
+
+  const targetIndex = State.screens.findIndex(s => s.id === id);
+  const wasActive = (State.activeScreenId === id);
+
+  State.screens.splice(targetIndex, 1);
+
+  if (wasActive) {
+    const nextIndex = Math.max(0, targetIndex - 1);
+    State.activeScreenId = State.screens[nextIndex].id;
+    loadActiveScreen(true);
+  } else {
+    updateScreensUI();
+  }
+
+  markDirty();
+  showToast(`Pantalla "${target.name}" eliminada`, 'info');
+}
+
+function renameScreen(id, newName) {
+  const cleanName = (newName || '').trim();
+  if (!cleanName) return;
+  const screen = State.screens.find(s => s.id === id);
+  if (!screen || screen.name === cleanName) return;
+
+  const exists = State.screens.some(s => s.id !== id && s.name.toLowerCase() === cleanName.toLowerCase());
+  if (exists) {
+    showToast(`Ya existe una pantalla con el nombre "${cleanName}"`, 'warning');
+    updateScreensUI();
+    return;
+  }
+
+  screen.name = cleanName;
+  updateScreensUI();
+  markDirty();
+  showToast(`Pantalla renombrada a "${cleanName}"`, 'info');
+}
+
+function updateScreensUI() {
+  const countEl = document.getElementById('screens-count');
+  const tbCountEl = document.getElementById('tb-screens-count');
+  const tabCountEl = document.getElementById('screens-tab-count');
+  const count = (State.screens && State.screens.length) || 1;
+
+  if (countEl) countEl.textContent = count;
+  if (tbCountEl) tbCountEl.textContent = count;
+  if (tabCountEl) tabCountEl.textContent = count;
+
+  const listEl = document.getElementById('screens-list');
+  if (!listEl) return;
+
+  listEl.innerHTML = '';
+
+  State.screens.forEach(screen => {
+    const isActive = (screen.id === State.activeScreenId);
+    const item = document.createElement('div');
+    item.className = `screen-item ${isActive ? 'active' : ''}`;
+    item.dataset.screenId = screen.id;
+
+    const monitorSvg = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+    `;
+
+    const dupSvg = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+    `;
+
+    const delSvg = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+    `;
+
+    const dupTitle = (window.I18N && window.I18N.t('btn_dup_screen_title')) || 'Duplicar pantalla';
+    const delTitle = (window.I18N && window.I18N.t('btn_del_screen_title')) || 'Eliminar pantalla';
+    const isOnlyScreen = (State.screens.length <= 1);
+
+    item.innerHTML = `
+      <div class="screen-item-icon">${monitorSvg}</div>
+      <div class="screen-item-info">
+        <div class="screen-item-name" title="Doble clic para renombrar">${escapeHtml(screen.name)}</div>
+        <div class="screen-item-res">${screen.width}×${screen.height}</div>
+      </div>
+      <div class="screen-item-actions">
+        <button class="screen-act-btn btn-duplicate-screen" title="${dupTitle}">${dupSvg}</button>
+        <button class="screen-act-btn btn-delete-screen danger" title="${delTitle}" ${isOnlyScreen ? 'disabled' : ''}>${delSvg}</button>
+      </div>
+    `;
+
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.screen-item-actions') || e.target.closest('.screen-name-edit')) return;
+      selectScreen(screen.id);
+    });
+
+    const nameEl = item.querySelector('.screen-item-name');
+    nameEl.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      const currentName = screen.name;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'screen-name-edit';
+      input.value = currentName;
+      input.maxLength = 32;
+
+      nameEl.replaceWith(input);
+      input.focus();
+      input.select();
+
+      let finished = false;
+      const finishRename = (save) => {
+        if (finished) return;
+        finished = true;
+        if (save && input.value.trim() && input.value.trim() !== currentName) {
+          renameScreen(screen.id, input.value.trim());
+        } else {
+          input.replaceWith(nameEl);
+        }
+      };
+
+      input.addEventListener('keydown', (ke) => {
+        if (ke.key === 'Enter') {
+          ke.preventDefault();
+          finishRename(true);
+        } else if (ke.key === 'Escape') {
+          ke.preventDefault();
+          finishRename(false);
+        }
+      });
+      input.addEventListener('blur', () => finishRename(true));
+    });
+
+    item.querySelector('.btn-duplicate-screen').addEventListener('click', (e) => {
+      e.stopPropagation();
+      duplicateScreen(screen.id);
+    });
+
+    item.querySelector('.btn-delete-screen').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteScreen(screen.id);
+    });
+
+    listEl.appendChild(item);
+  });
+}
+
+function toggleScreensPanel(force) {
+  const panel = document.getElementById('panel-screens');
+  const expandTab = document.getElementById('btn-expand-screens');
+  const tbBtn = document.getElementById('btn-toggle-screens');
+  if (!panel) return;
+
+  if (typeof force === 'boolean') {
+    State.screensPanelCollapsed = !force;
+  } else {
+    State.screensPanelCollapsed = !State.screensPanelCollapsed;
+  }
+
+  panel.classList.toggle('collapsed', State.screensPanelCollapsed);
+  if (expandTab) expandTab.classList.toggle('hidden', !State.screensPanelCollapsed);
+  if (tbBtn) tbBtn.classList.toggle('active', !State.screensPanelCollapsed);
+
+  setTimeout(() => {
+    resizeCanvases();
+  }, 230);
+}
+
+function bindScreensPanel() {
+  document.getElementById('btn-add-screen')?.addEventListener('click', () => addScreen());
+  document.getElementById('btn-collapse-screens')?.addEventListener('click', () => toggleScreensPanel(false));
+  document.getElementById('btn-expand-screens')?.addEventListener('click', () => toggleScreensPanel(true));
+  document.getElementById('btn-toggle-screens')?.addEventListener('click', () => toggleScreensPanel());
+}
+
+// ============================================================
 // GESTION DE PROYECTOS
 // ============================================================
 
@@ -3639,6 +4099,9 @@ function newProject() {
   if (State.isPlaying) stopAnimation();
   updateTimelineUI();
 
+  // Reiniciar pantallas
+  initScreens(true);
+
   document.getElementById('project-name-input').value = 'Sin título';
   document.getElementById('project-name-display').textContent = 'Sin título';
   document.getElementById('project-desc-input').value = '';
@@ -3651,9 +4114,24 @@ function newProject() {
 }
 
 async function saveProject() {
+  syncActiveScreen();
   syncActiveFrameBitmap();
   const canvasData = bitmapToBase64();
   const thumbnail = mainCanvas.toDataURL('image/png', 0.5);
+
+  const serializedScreens = (State.screens || []).map(s => ({
+    id: s.id,
+    name: s.name,
+    width: s.width,
+    height: s.height,
+    canvas_data: screenBitmapToBase64(s.bitmap, s.width, s.height),
+    elements: s.elements ? JSON.parse(JSON.stringify(s.elements)) : [],
+    textElements: s.textElements ? JSON.parse(JSON.stringify(s.textElements)) : [],
+    displayColor: s.displayColor,
+    driverName: s.driverName,
+    interfaceType: s.interfaceType,
+    i2cAddress: s.i2cAddress
+  }));
 
   const projectData = {
     id: State.projectId,
@@ -3665,6 +4143,9 @@ async function saveProject() {
     interface: State.interfaceType,
     display_color: State.displayColor,
     canvas_data: canvasData,
+    screens: serializedScreens,
+    active_screen_id: State.activeScreenId,
+    canvas_elements: serializedScreens,
     frames: (State.frames && State.frames.length > 1) ? State.frames.map(f => Array.from(f.bitmap)) : null,
     fps: State.fps || 10,
     thumbnail
@@ -3804,12 +4285,52 @@ function loadProject(p) {
   State.interfaceType = p.interface || 'I2C';
   State.displayColor = p.display_color || 'white';
 
-  // Restaurar bitmap y fotogramas de animación
-  if (p.canvas_data) {
-    State.bitmap = base64ToBitmap(p.canvas_data, State.width, State.height);
+  // Restaurar Screens
+  const rawScreens = p.screens || (Array.isArray(p.canvas_elements) && p.canvas_elements.length > 0 && p.canvas_elements[0].name ? p.canvas_elements : null);
+  if (rawScreens && rawScreens.length > 0) {
+    State.screens = rawScreens.map(s => ({
+      id: s.id || generateScreenId(),
+      name: s.name || 'Screen',
+      width: s.width || 128,
+      height: s.height || 64,
+      bitmap: typeof s.canvas_data === 'string'
+        ? base64ToBitmap(s.canvas_data, s.width || 128, s.height || 64)
+        : (s.bitmap ? new Uint8Array(s.bitmap) : new Uint8Array((s.width || 128) * (s.height || 64))),
+      elements: s.elements || [],
+      textElements: s.textElements || [],
+      displayColor: s.displayColor || p.display_color || 'white',
+      driverName: s.driverName || p.driver_name || 'SSD1306',
+      interfaceType: s.interfaceType || p.interface || 'I2C',
+      i2cAddress: s.i2cAddress || '0x3C',
+      history: [],
+      historyIndex: -1
+    }));
+    State.activeScreenId = (p.active_screen_id && State.screens.some(s => s.id === p.active_screen_id))
+      ? p.active_screen_id
+      : State.screens[0].id;
   } else {
-    resetBitmap();
+    // Compatibilidad y migración con proyectos antiguos de una sola pantalla
+    const initialBitmap = p.canvas_data
+      ? base64ToBitmap(p.canvas_data, State.width, State.height)
+      : new Uint8Array(State.width * State.height);
+
+    const singleScreen = createScreen({
+      id: generateScreenId(),
+      name: 'Screen1',
+      width: State.width,
+      height: State.height,
+      bitmap: initialBitmap,
+      elements: Array.isArray(p.canvas_elements) ? p.canvas_elements : [],
+      displayColor: State.displayColor,
+      driverName: State.driverName,
+      interfaceType: State.interfaceType
+    });
+    State.screens = [singleScreen];
+    State.activeScreenId = singleScreen.id;
   }
+
+  // Cargar pantalla activa seleccionada
+  loadActiveScreen(true);
 
   if (p.frames && p.frames.length > 0) {
     State.frames = p.frames.map((bmArray, idx) => ({

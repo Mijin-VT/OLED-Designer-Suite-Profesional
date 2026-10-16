@@ -14,8 +14,10 @@ const db = require('./db');
 async function saveProject(projectData) {
   const {
     id, name, description, driver_name, width, height,
-    interface: iface, display_color, canvas_data, thumbnail
+    interface: iface, display_color, canvas_data, screens, canvas_elements, thumbnail
   } = projectData;
+
+  const elementsData = JSON.stringify(canvas_elements || screens || []);
 
   return db.withTransaction(async (client) => {
     // Buscar driver_id
@@ -42,11 +44,11 @@ async function saveProject(projectData) {
         `UPDATE projects SET
           name = $1, description = $2, driver_id = $3, resolution_id = $4,
           width = $5, height = $6, interface = $7, display_color = $8,
-          canvas_data = $9, thumbnail = $10, last_opened_at = NOW()
-         WHERE id = $11
+          canvas_data = $9, thumbnail = $10, canvas_elements = $11, last_opened_at = NOW()
+         WHERE id = $12
          RETURNING *`,
         [name, description, driverId, resolutionId, width, height,
-         iface, display_color, canvas_data, thumbnail, id]
+         iface, display_color, canvas_data, thumbnail, elementsData, id]
       );
       return result.rows[0];
     } else {
@@ -54,11 +56,11 @@ async function saveProject(projectData) {
       const result = await client.query(
         `INSERT INTO projects
           (user_id, name, description, driver_id, resolution_id, width, height,
-           interface, display_color, canvas_data, thumbnail)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+           interface, display_color, canvas_data, canvas_elements, thumbnail)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
          RETURNING *`,
         [userId, name, description, driverId, resolutionId, width, height,
-         iface, display_color, canvas_data, thumbnail]
+         iface, display_color, canvas_data, elementsData, thumbnail]
       );
       return result.rows[0];
     }

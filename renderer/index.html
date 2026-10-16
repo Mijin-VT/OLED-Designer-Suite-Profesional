@@ -78,6 +78,11 @@
       <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
       <span data-i18n="btn_templates">Plantillas</span>
     </button>
+    <button class="btn-toolbar btn-screens" id="btn-toggle-screens" title="Administrador de Pantallas (Screens)" data-i18n-title="btn_screens_title">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span data-i18n="screens_title">Screens</span>
+      <span class="toolbar-badge" id="tb-screens-count">1</span>
+    </button>
     <button class="btn-toolbar btn-dual" id="btn-toggle-dual-screen" title="Modo Doble Pantalla (Dual OLED 0x3C / 0x3D)" data-i18n-title="btn_dual_oled_title">
       <svg viewBox="0 0 24 24"><rect x="2" y="5" width="9" height="14" rx="1.5"/><rect x="13" y="5" width="9" height="14" rx="1.5"/></svg>
       <span data-i18n="btn_dual_oled">Dual OLED</span>
@@ -338,6 +343,49 @@
       </button>
     </div>
   </aside>
+
+  <!-- ========== PANEL LATERAL — Screens Manager ========== -->
+  <aside class="panel panel-screens" id="panel-screens">
+    <div class="screens-header">
+      <div class="screens-header-title-box">
+        <svg class="screens-header-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <span class="screens-title" data-i18n="screens_title">Screens</span>
+        <span class="screens-count" id="screens-count">1</span>
+      </div>
+      <div class="screens-header-actions">
+        <button class="screens-header-btn" id="btn-add-screen" title="Crear nueva pantalla (+)" data-i18n-title="btn_add_screen_title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button class="screens-header-btn" id="btn-collapse-screens" title="Contraer panel" data-i18n-title="btn_collapse_screens_title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="screens-list" id="screens-list">
+      <!-- Generado dinámicamente -->
+    </div>
+  </aside>
+
+  <!-- Botón pestaña para expandir panel de pantallas cuando está contraído -->
+  <button class="screens-expand-tab hidden" id="btn-expand-screens" title="Expandir panel de Screens" data-i18n-title="btn_expand_screens_title">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+    <span class="expand-tab-text" data-i18n="screens_title">Screens</span>
+    <span class="expand-tab-badge" id="screens-tab-count">1</span>
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
 
   <!-- ========== ÁREA CENTRAL — Canvas ========== -->
   <main class="canvas-area" id="canvas-area">
